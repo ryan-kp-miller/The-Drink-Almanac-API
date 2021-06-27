@@ -20,6 +20,7 @@ class Favorite(Resource):
     @jwt_required()
     @api.doc(security="apiKey", responses={
         404: 'Favorite not found',
+        401: 'Missing Authorization Header',
         200: 'Success',
     })
     def get(self):
@@ -33,6 +34,7 @@ class Favorite(Resource):
     @jwt_required()
     @api.doc(security="apiKey", responses={
         404: 'User for that JWT not found. Please remove the stale JWT',
+        401: 'Missing Authorization Header',
         400: 'The user has already favorited this drink',
         201: 'Success',
     })
@@ -54,6 +56,7 @@ class Favorite(Resource):
     @jwt_required()
     @api.doc(security="apiKey", responses={
         404: 'Favorite not found',
+        401: 'Missing Authorization Header',
         201: 'Success',
     })
     def delete(self):
