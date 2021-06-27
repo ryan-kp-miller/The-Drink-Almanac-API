@@ -1,6 +1,6 @@
 import requests
 
-API_BASE_URL = "http://127.0.0.1:5000/api/"
+API_BASE_URL = "http://127.0.0.1:5000/"
 
 def print_response(response):
     print(f"Response Status Code: {response.status_code}")
@@ -18,13 +18,13 @@ user_payload = {
 }
 
 # register a new user if the test user doesn't already exist
-response = requests.post(API_BASE_URL + "register", json=user_payload)
+response = requests.post(API_BASE_URL + "user/register", json=user_payload)
 print_response(response)
 if response.status_code == 201:
     user_id = response.json()['id']
 
 # log in as the user
-response = requests.post(API_BASE_URL + "login", json=user_payload)
+response = requests.post(API_BASE_URL + "user/login", json=user_payload)
 print_response(response)
 access_token = response.json()['access_token']
 auth_headers = {'Authorization': f'Bearer {access_token}'}
