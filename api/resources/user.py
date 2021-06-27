@@ -25,12 +25,16 @@ _user_parser.add_argument(
 @api.route("/register")
 class UserRegister(Resource):
     @api.expect(_user_parser)
+    @api.doc(responses={
+        400: 'A user with the username {username} already exists',
+        201: 'Success',
+    })
     def post(self):
         data = _user_parser.parse_args()
         
         user = UserModel.find_by_username(data['username'])
         if user:
-            return {'message': f'A user with the username "{data["username"]}" already exists.'}, 400
+            return {'message': f'A user with the username {data["username"]} already exists'}, 400
         
         user = UserModel(**data)
         user.save_to_db()
@@ -42,36 +46,53 @@ class UserRegister(Resource):
 class User(Resource):
     @classmethod
     @jwt_required()
-    @api.doc(security="apiKey")
+    @api.doc(security="apiKey", responses={
+        200: 'Success',
+        401: 'Missing Authorization Header',
+        404: 'User for that JWT not found. Please remove the stale JWT'
+    })
     def get(cls):
         user_id = get_jwt_identity()
-        user = UserModel.find_by_id(user_id)           
-        return user.json(), 200
+        user = UserModel.find_by_id(user_id)
+        if user:
+            return user.json(), 200
+        return {'message': 'User for that JWT not found. Please remove the stale JWT'}, 404
+
 
     @classmethod
     @api.expect(_user_parser)
+    @api.doc(responses={
+        404: 'User with username {username} not found',
+        400: 'Password was incorrect',
+        200: 'User with id {username} was deleted',
+    })
     def delete(cls):
         data = _user_parser.parse_args()
         user = UserModel.find_by_username(data['username'])
         if not user:
-            return {'message': f"User with username {data['username']} not found."}, 404
+            return {'message': f"User with username {data['username']} not found"}, 404
             
         if user.password != data['password']:
             return {'message': f"Password was incorrect"}, 400
 
         user.delete_from_db()    
-        return {'message': f"User with id {data['username']} was deleted."}, 200
+        return {'message': f"User with id {data['username']} was deleted"}, 200
 
 
 @api.route("/login")
 class UserLogin(Resource):
     @classmethod
     @api.expect(_user_parser)
+    @api.doc(responses={
+        404: 'A user with the username {username} not found',
+        400: 'Password was incorrect',
+        201: 'Success',
+    })
     def post(cls):
         data = _user_parser.parse_args()
         user = UserModel.find_by_username(data['username'])
         if not user:
-            return {'message': f"User with username {data['username']} not found."}, 404
+            return {'message': f"User with the username {data['username']} not found"}, 404
             
         if user.password != data['password']:
             return {'message': f"Password was incorrect"}, 400
