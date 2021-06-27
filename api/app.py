@@ -36,7 +36,14 @@ def create_app():
     jwt = JWTManager(app)  #create /auth endpoint
 
 
-    api = Api(app, prefix="/api", doc="/api")
+    api = Api(
+        app, 
+        prefix="/api", 
+        doc="/api", 
+        title="The Drink Almanac REST API",
+        description="Manage accounts and add or remove favorited drinks"
+    )
+
     api.add_resource(User,         '/user')
     api.add_resource(UserRegister, '/register')
     api.add_resource(Favorite,     '/favorite')
