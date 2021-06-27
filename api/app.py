@@ -38,8 +38,8 @@ def create_app():
 
     api = Api(
         app, 
-        prefix="/api", 
-        doc="/api", 
+        # prefix="/api", 
+        # doc="/api", 
         title="The Drink Almanac REST API",
         description="Manage accounts and add or remove favorited drinks"
     )
