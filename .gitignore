@@ -1,4 +1,11 @@
+# python virtual environment
 venv
+
+# python cache files
+*pycache*
+
+# API config file
+config.py
+
+# VSCode settings
 .vscode
-*cache*
-data.db

@@ -1,5 +1,7 @@
-from flask_restful import Resource, reqparse
-from werkzeug.security import safe_str_cmp
+from flask_jwt_extended.view_decorators import jwt_required
+from flask_restx import Resource, reqparse
+from flask_jwt_extended.utils import create_access_token, create_refresh_token, get_jwt_identity
+
 from api.models.user import UserModel
 
 
@@ -19,23 +21,45 @@ class UserRegister(Resource):
         user = UserModel(**data)
         user.save_to_db()
 
-        return {'message': 'User created successfully.'}, 201
+        return user.json(), 201
 
 
 class User(Resource):
     @classmethod
-    def get(cls, user_id):
-        user = UserModel.find_by_id(user_id)
-        if user:
-            return user.json()
-        return {'message': f'User with id {user_id} not found.'}, 404
+    @jwt_required()
+    def get(cls):
+        user_id = get_jwt_identity()
+        user = UserModel.find_by_id(user_id)           
+        return user.json(), 200
 
     @classmethod
-    def delete(cls, user_id):
-        user = UserModel.find_by_id(user_id)
+    def delete(cls):
+        data = _user_parser.parse_args()
+        user = UserModel.find_by_username(data['username'])
         if not user:
-            return {'message': f'User with id {user_id} not found.'}, 404
+            return {'message': f"User with username {data['username']} not found."}, 404
             
-        user.delete_from_db()    
-        return {'message': f'User with id {user_id} was deleted.'}, 200
+        if user.password != data['password']:
+            return {'message': f"Password was incorrect"}, 400
 
+        user.delete_from_db()    
+        return {'message': f"User with id {data['username']} was deleted."}, 200
+
+
+class UserLogin(Resource):
+    @classmethod
+    def post(cls):
+        data = _user_parser.parse_args()
+        user = UserModel.find_by_username(data['username'])
+        if not user:
+            return {'message': f"User with username {data['username']} not found."}, 404
+            
+        if user.password != data['password']:
+            return {'message': f"Password was incorrect"}, 400
+        
+        access_token = create_access_token(identity=user.id, fresh=True)
+        refresh_token = create_refresh_token(identity=user.id)
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }, 200

@@ -1,6 +1,6 @@
+import os
 from api.app import create_app
 from api.db import db
-
 
 app = create_app()
 
@@ -12,6 +12,8 @@ def create_tables():
 
 db.init_app(app)
 
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        debug=False, 
+        port=os.environ.get('PORT', 5000)
+    )

@@ -1,10 +1,9 @@
 from api.db import db
+from api.models.favorite import FavoriteModel
 
 class UserModel(db.Model):
-    # declare the table name for SQLAlchemy
+    # declare the table name, columns, and relationships for SQLAlchemy
     __tablename__ = 'users'
-
-    # declare the columns for SQLAlchemy
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80))
     password = db.Column(db.String(80))
@@ -17,6 +16,7 @@ class UserModel(db.Model):
         return {
             'id': self.id,
             'username': self.username,
+            'favorites': [fav.json()['drink_id'] for fav in FavoriteModel.find_favorites_by_user_id(self.id)],
         }
     
     def save_to_db(self):
@@ -24,6 +24,10 @@ class UserModel(db.Model):
         db.session.commit()
 
     def delete_from_db(self):
+        # retrieve and remove all the favorites for that user
+        FavoriteModel.query.filter_by(user_id=self.id).delete()
+
+        # remove the user from the db
         db.session.delete(self)
         db.session.commit()
 

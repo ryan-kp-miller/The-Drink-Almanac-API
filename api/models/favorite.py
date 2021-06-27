@@ -5,7 +5,7 @@ class FavoriteModel(db.Model):
     __tablename__ = 'favorites'
     id = db.Column(db.Integer, primary_key=True)
     drink_id = db.Column(db.Integer)
-    user_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship('UserModel')
 
     def __init__(self, user_id, drink_id):
