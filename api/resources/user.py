@@ -96,7 +96,7 @@ class UserLogin(Resource):
     @api.doc(responses={
         404: 'A user with the username {username} not found',
         400: 'Password was incorrect',
-        201: 'Success',
+        200: 'Success',
     })
     def post(cls):
         data = _user_parser.parse_args()
