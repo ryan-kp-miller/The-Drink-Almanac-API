@@ -72,7 +72,7 @@ class User(Resource):
     @classmethod
     @api.expect(_user_parser)
     @api.doc(responses={
-        404: 'User with username {username} not found',
+        404: 'User with the username {username} not found',
         400: 'Password was incorrect',
         200: 'User with id {username} was deleted',
     })
@@ -80,7 +80,7 @@ class User(Resource):
         data = _user_parser.parse_args()
         user = UserModel.find_by_username(data['username'])
         if not user:
-            return {'message': f"User with username {data['username']} not found"}, 404
+            return {'message': f"User with the username {data['username']} not found"}, 404
             
         if user.password != data['password']:
             return {'message': f"Password was incorrect"}, 400
