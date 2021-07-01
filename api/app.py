@@ -34,6 +34,10 @@ def create_app():
     # turn off flask_sqlalchemy modification tracker so we can use SQLAlchemy's mod tracker, which is better
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
     
+    # allows Flask extensions like flask_jwt to raise their own errors,
+    # as opposed to Flask just returning a 500 for all errors
+    app.config['PROPAGATE_EXCEPTIONS'] = True
+
     # allows us to blacklist both access and refresh tokens
     app.config['JWT_BLACKLIST_ENABLED'] = True
     app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
@@ -48,7 +52,8 @@ def create_app():
         app, 
         title="The Drink Almanac REST API",
         description="Manage accounts and add or remove favorited drinks",
-        authorizations=swagger_auth
+        # security='apiKey',
+        # authorizations=swagger_auth
     )
 
     api.add_namespace(user_namespace)
