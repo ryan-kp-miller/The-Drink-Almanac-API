@@ -15,7 +15,7 @@ parser.add_argument(
     
 )
 
-@api.route("")
+@api.route("/<int:drink_id>")
 class Favorite(Resource):
     @jwt_required()
     @api.doc(security="apiKey", responses={
@@ -23,11 +23,9 @@ class Favorite(Resource):
         401: 'Missing Authorization Header',
         200: 'Success',
     })
-    @api.expect(parser)
-    def get(self):
+    def get(self, drink_id):
         user_id = get_jwt_identity()
-        data = parser.parse_args()
-        favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, data['drink_id'])
+        favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, drink_id)
         if favorite:
             return favorite.json(), 200
         return {'message': f'Favorite not found'}, 404
@@ -39,18 +37,16 @@ class Favorite(Resource):
         400: 'The user has already favorited this drink',
         201: 'Success',
     })
-    @api.expect(parser)
-    def post(self):
+    def post(self, drink_id):
         user_id = get_jwt_identity()
-        data = parser.parse_args()
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': "User for that JWT not found. Please remove the stale JWT"}, 404
 
-        favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, data['drink_id'])
+        favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, drink_id)
         if favorite:
             return {'message': 'The user has already favorited this drink'}, 400
-        favorite = FavoriteModel(user_id, data['drink_id'])
+        favorite = FavoriteModel(user_id, drink_id)
         favorite.save_to_db()
         return favorite.json(), 201
 
@@ -60,11 +56,9 @@ class Favorite(Resource):
         401: 'Missing Authorization Header',
         201: 'Success',
     })
-    @api.expect(parser)
-    def delete(self):
+    def delete(self, drink_id):
         user_id = get_jwt_identity()
-        data = parser.parse_args()
-        favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, data['drink_id'])
+        favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, drink_id)
         if favorite:
             favorite.delete_from_db()
             return {'message': 'Success'}, 200
