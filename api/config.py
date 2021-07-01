@@ -3,7 +3,7 @@ from datetime import timedelta
 
 
 class Config(object):
-    SECRET = os.getenv('SECRET_KEY')
+    SECRET_KEY = os.getenv('SECRET_KEY')
 
     # turn off flask_sqlalchemy modification tracker so we can use SQLAlchemy's mod tracker, which is better
     SQLALCHEMY_TRACK_MODIFICATIONS = False 
