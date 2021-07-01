@@ -94,7 +94,7 @@ class UserLogin(Resource):
     @classmethod
     @api.expect(_user_parser)
     @api.doc(responses={
-        404: 'A user with the username {username} not found',
+        404: 'User with the username {username} not found',
         400: 'Password was incorrect',
         200: 'Success',
     })
