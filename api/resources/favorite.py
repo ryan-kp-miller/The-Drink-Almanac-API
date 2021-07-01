@@ -15,9 +15,20 @@ parser.add_argument(
     
 )
 
+_auth_parser = reqparse.RequestParser()
+_auth_parser.add_argument(
+    'Authorization',
+    required=True,
+    type=str,
+    help="JWT Access Token following the format 'Bearer {access_token}'",
+    location="headers"
+)
+
+
 @api.route("/<int:drink_id>")
 class Favorite(Resource):
     @jwt_required()
+    @api.expect(_auth_parser)
     @api.doc(security="apiKey", responses={
         404: 'Favorite not found',
         401: 'Missing Authorization Header',
@@ -31,6 +42,7 @@ class Favorite(Resource):
         return {'message': f'Favorite not found'}, 404
 
     @jwt_required()
+    @api.expect(_auth_parser)
     @api.doc(security="apiKey", responses={
         404: 'User for that JWT not found. Please remove the stale JWT',
         401: 'Missing Authorization Header',
@@ -51,6 +63,7 @@ class Favorite(Resource):
         return favorite.json(), 201
 
     @jwt_required()
+    @api.expect(_auth_parser)
     @api.doc(security="apiKey", responses={
         404: 'Favorite not found',
         401: 'Missing Authorization Header',

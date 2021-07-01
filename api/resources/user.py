@@ -21,11 +21,20 @@ _user_parser.add_argument(
     location="json"
 )
 
+_auth_parser = reqparse.RequestParser()
+_auth_parser.add_argument(
+    'Authorization',
+    required=True,
+    type=str,
+    help="JWT Access Token following the format 'Bearer {access_token}'",
+    location="headers"
+)
+
 
 @api.route("/register")
 class UserRegister(Resource):
     @api.expect(_user_parser)
-    @api.doc(responses={
+    @api.doc(security="apiKey", responses={
         400: 'A user with the username {username} already exists',
         201: 'Success',
     })
@@ -46,6 +55,7 @@ class UserRegister(Resource):
 class User(Resource):
     @classmethod
     @jwt_required()
+    @api.expect(_auth_parser)
     @api.doc(security="apiKey", responses={
         200: 'Success',
         401: 'Missing Authorization Header',
