@@ -23,6 +23,7 @@ class Favorite(Resource):
         401: 'Missing Authorization Header',
         200: 'Success',
     })
+    @api.expect(parser)
     def get(self):
         user_id = get_jwt_identity()
         data = parser.parse_args()
@@ -59,6 +60,7 @@ class Favorite(Resource):
         401: 'Missing Authorization Header',
         201: 'Success',
     })
+    @api.expect(parser)
     def delete(self):
         user_id = get_jwt_identity()
         data = parser.parse_args()
