@@ -33,33 +33,27 @@ auth_headers = {'Authorization': f'Bearer {access_token}'}
 response = requests.get(API_BASE_URL + "user", headers=auth_headers)
 print_response(response)
 
-payload_list = [
-    {'drink_id': 11007},
-    {'drink_id': 11001},
-]
+drink_list = [11007, 11001]
 
 # check if the user already favorited these drinks
 # if not, favorite the drink
 # then delete that favorite
-for payload in payload_list:
+for drink_id in drink_list:
     response = requests.get(
-        API_BASE_URL + "favorite", 
-        json=payload,
+        API_BASE_URL + f"favorite/{drink_id}", 
         headers=auth_headers
     )
     print_response(response)
 
     if response.status_code == 404:
         response = requests.post(
-            API_BASE_URL + "favorite", 
-            json=payload,
+            API_BASE_URL + f"favorite/{drink_id}", 
             headers=auth_headers
         )
         print_response(response)
 
     response = requests.delete(
-        API_BASE_URL + "favorite", 
-        json=payload,
+        API_BASE_URL + f"favorite/{drink_id}", 
         headers=auth_headers
     )
     print_response(response)
