@@ -15,15 +15,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # so manually switching to the new one
 DB_URI = DB_URI.replace("postgres://", "postgresql://")
 
-swagger_auth = {
-    'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization',
-        'description': "Type in the *'Value'* input box below: **'Bearer &lt;JWT&gt;'**, where JWT is the token"
-    }
-}
-
 def create_app():
     app = Flask(__name__)
     CORS(app)
@@ -52,8 +43,6 @@ def create_app():
         app, 
         title="The Drink Almanac REST API",
         description="Manage accounts and add or remove favorited drinks",
-        # security='apiKey',
-        # authorizations=swagger_auth
     )
 
     api.add_namespace(user_namespace)
