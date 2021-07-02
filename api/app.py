@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from api.db import db
 from api.config import app_config
@@ -12,6 +13,7 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     jwt = JWTManager(app)
     db.init_app(app)
+    CORS(app)
 
     # before any request to the API, this function will be called 
     # and will create the data.db file and all the tables within the db (unless they already exist)
