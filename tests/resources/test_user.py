@@ -185,7 +185,7 @@ class TestUser:
         data = loads(response.data)
         assert data['message'] == f'User with the username {bad_username} not found'
 
-    def test_post_missing_args(self, client):
+    def test_delete_missing_args(self, client):
         # missing username
         response = client.delete(
             'user',
