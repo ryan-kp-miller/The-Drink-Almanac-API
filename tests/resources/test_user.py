@@ -158,7 +158,7 @@ class TestUser:
         data = loads(response.data)
         assert 'Missing Authorization Header' in data['msg']
         
-    def test_get_incorrect_access_token(self, client):
+    def test_get_invalid_access_token(self, client):
         # access token takend from jwt.io
         bad_auth_header = {
             "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ"
