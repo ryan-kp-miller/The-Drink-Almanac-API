@@ -1,4 +1,3 @@
-from json import loads
 import pytest
 from tests.resources import (
     client, get_auth_header, TEST_USERNAME, TEST_PASSWORD, 
@@ -14,7 +13,7 @@ class TestUserRegister:
         )
         assert response.status_code == 201
 
-        data = loads(response.data)
+        data = response.get_json()
         actual_keys = data.keys()
         expected_keys = ["id", "username", "favorites"]
         assert len(actual_keys) == len(expected_keys)
@@ -34,7 +33,7 @@ class TestUserRegister:
                 json=TEST_CREDENTIALS_PAYLOAD
             )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert data['message'] == f'A user with the username {TEST_USERNAME} already exists'
 
     def test_post_missing_args(self, client):
@@ -46,7 +45,7 @@ class TestUserRegister:
             }
         )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert "password" in data['errors'].keys()
         assert ("Missing required parameter in the JSON body" in 
             data['errors']['password'])
@@ -59,7 +58,7 @@ class TestUserRegister:
             }
         )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert "username" in data['errors'].keys()
         assert ("Missing required parameter in the JSON body" in 
             data['errors']['username'])
@@ -76,7 +75,7 @@ class TestUserLogin:
             json=TEST_CREDENTIALS_PAYLOAD
         )
         assert response.status_code == 200
-        data = loads(response.data)
+        data = response.get_json()
         actual_keys = data.keys()
         expected_keys = ["access_token", "refresh_token"]
         assert len(actual_keys) == len(expected_keys)
@@ -98,7 +97,7 @@ class TestUserLogin:
             }
         )
         assert response.status_code == 404
-        data = loads(response.data)
+        data = response.get_json()
         assert data['message'] == f'User with the username {bad_username} not found'
 
     def test_post_missing_args(self, client):
@@ -110,7 +109,7 @@ class TestUserLogin:
             }
         )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert "password" in data['errors'].keys()
         assert ("Missing required parameter in the JSON body" in 
             data['errors']['password'])
@@ -123,7 +122,7 @@ class TestUserLogin:
             }
         )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert "username" in data['errors'].keys()
         assert ("Missing required parameter in the JSON body" in 
             data['errors']['username'])
@@ -140,7 +139,7 @@ class TestUser:
             headers=self.auth_header
         )
         assert response.status_code == 200
-        data = loads(response.data)
+        data = response.get_json()
         actual_keys = data.keys()
         expected_keys = ["id", "username", "favorites"]
         assert len(actual_keys) == len(expected_keys)
@@ -155,7 +154,7 @@ class TestUser:
     def test_get_missing_auth_header(self, client):
         response = client.get('/user')
         assert response.status_code == 401
-        data = loads(response.data)
+        data = response.get_json()
         assert 'Missing Authorization Header' in data['msg']
         
     def test_get_invalid_access_token(self, client):
@@ -182,7 +181,7 @@ class TestUser:
             }
         )
         assert response.status_code == 404
-        data = loads(response.data)
+        data = response.get_json()
         assert data['message'] == f'User with the username {bad_username} not found'
 
     def test_delete_missing_args(self, client):
@@ -194,7 +193,7 @@ class TestUser:
             }
         )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert "password" in data['errors'].keys()
         assert ("Missing required parameter in the JSON body" in 
             data['errors']['password'])
@@ -207,7 +206,7 @@ class TestUser:
             }
         )
         assert response.status_code == 400
-        data = loads(response.data)
+        data = response.get_json()
         assert "username" in data['errors'].keys()
         assert ("Missing required parameter in the JSON body" in 
             data['errors']['username'])

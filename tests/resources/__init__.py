@@ -1,5 +1,4 @@
 import os
-from json import loads
 from pytest import fixture
 from api.app import create_app
 
@@ -41,5 +40,5 @@ def get_auth_header(client, credentials):
     """
     response = client.post('user/register', json=credentials)
     response = client.post('user/login', json=credentials)
-    return {"Authorization": f"Bearer {loads(response.data)['access_token']}"}
+    return {"Authorization": f"Bearer {response.get_json()['access_token']}"}
 

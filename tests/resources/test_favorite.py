@@ -1,4 +1,3 @@
-from json import loads
 import pytest
 from tests.resources import (
     client, get_auth_header, TEST_CREDENTIALS_PAYLOAD
@@ -20,7 +19,7 @@ class TestFavorite:
         )
 
         assert response.status_code == 201
-        data = loads(response.data)
+        data = response.get_json()
         for key in data.keys():
             assert key in self.EXPECTED_KEYS
         assert data['drink_id'] == self.TEST_DRINK_ID
@@ -41,7 +40,7 @@ class TestFavorite:
     def test_post_missing_auth_header(self, client):
         response = client.post(f'/favorite/{self.TEST_DRINK_ID}')
         assert response.status_code == 401
-        data = loads(response.data)
+        data = response.get_json()
         assert 'Missing Authorization Header' in data['msg']
         
     def test_post_invalid_access_token(self, client):
@@ -76,7 +75,7 @@ class TestFavorite:
         )
 
         assert response.status_code == 200
-        data = loads(response.data)
+        data = response.get_json()
         for key in data.keys():
             assert key in self.EXPECTED_KEYS
         assert data['drink_id'] == self.TEST_DRINK_ID
@@ -87,7 +86,7 @@ class TestFavorite:
     def test_get_missing_auth_header(self, client):
         response = client.get(f'/favorite/{self.TEST_DRINK_ID}')
         assert response.status_code == 401
-        data = loads(response.data)
+        data = response.get_json()
         assert 'Missing Authorization Header' in data['msg']
         
     def test_get_invalid_access_token(self, client):
@@ -142,7 +141,7 @@ class TestFavorite:
     def test_delete_missing_auth_header(self, client):
         response = client.delete(f'/favorite/{self.TEST_DRINK_ID}')
         assert response.status_code == 401
-        data = loads(response.data)
+        data = response.get_json()
         assert 'Missing Authorization Header' in data['msg']
         
     def test_delete_invalid_access_token(self, client):
