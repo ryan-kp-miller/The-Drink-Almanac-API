@@ -1,12 +1,8 @@
 from json import loads
 import pytest
-from tests.resources import client, TEST_USERNAME, TEST_PASSWORD
-
-TEST_CREDENTIALS_PAYLOAD = {
-    "username": TEST_USERNAME,
-    "password": TEST_PASSWORD
-}
-
+from tests.resources import (
+    client, TEST_USERNAME, TEST_PASSWORD, TEST_CREDENTIALS_PAYLOAD
+)
 
 
 class TestUserRegister:

@@ -5,6 +5,11 @@ from api.app import create_app
 TEST_USERNAME = "test"
 TEST_PASSWORD = "test"
 
+TEST_CREDENTIALS_PAYLOAD = {
+    "username": TEST_USERNAME,
+    "password": TEST_PASSWORD
+}
+
 # setting scope to module allows us to use the same test database
 # across all tests in this file, so users persist across tests
 # this lets us reuse a single JWT access token in later tests
