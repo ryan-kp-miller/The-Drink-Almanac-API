@@ -60,3 +60,7 @@ class TestFavorite:
     def test_post_missing_drink_id(self, client):
         response = client.post('/favorite/', headers=self.auth_header)
         assert response.status_code == 404
+
+    def test_post_invalid_drink_id(self, client):
+        response = client.post('/favorite/test', headers=self.auth_header)
+        assert response.status_code == 404
