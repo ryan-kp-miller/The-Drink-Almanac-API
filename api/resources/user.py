@@ -34,7 +34,7 @@ _auth_parser.add_argument(
 @api.route("/register")
 class UserRegister(Resource):
     @api.expect(_user_parser)
-    @api.doc(security="apiKey", responses={
+    @api.doc(responses={
         400: 'A user with the username {username} already exists',
         201: 'Success',
     })
