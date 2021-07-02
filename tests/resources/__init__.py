@@ -1,7 +1,7 @@
 import os
 from pytest import fixture
 from api.app import create_app
-from tests import TEST_USERNAME, TEST_PASSWORD, TEST_CREDENTIALS_PAYLOAD
+from tests import TEST_CREDENTIALS
 
 
 # setting scope to module allows us to use the same test database

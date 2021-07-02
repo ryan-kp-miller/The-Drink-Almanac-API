@@ -1,7 +1,6 @@
 import pytest
 from tests.resources import (
-    client, get_auth_header, TEST_USERNAME, TEST_PASSWORD, 
-    TEST_CREDENTIALS_PAYLOAD
+    client, get_auth_header, TEST_CREDENTIALS
 )
 
 
@@ -9,7 +8,7 @@ class TestUserRegister:
     def test_post_correct_args(self, client):
         response = client.post(
             "/user/register",
-            json=TEST_CREDENTIALS_PAYLOAD
+            json=TEST_CREDENTIALS
         )
         assert response.status_code == 201
 
@@ -20,7 +19,7 @@ class TestUserRegister:
         for key in expected_keys:
             assert key in actual_keys 
         
-        assert data["username"] == TEST_USERNAME
+        assert data["username"] == TEST_CREDENTIALS['username']
         assert isinstance(data['id'], int)
         assert isinstance(data['favorites'], list)
         assert len(data['favorites']) == 0
@@ -30,18 +29,19 @@ class TestUserRegister:
         for _ in range(2):
             response = client.post(
                 "/user/register",
-                json=TEST_CREDENTIALS_PAYLOAD
+                json=TEST_CREDENTIALS
             )
         assert response.status_code == 400
         data = response.get_json()
-        assert data['message'] == f'A user with the username {TEST_USERNAME} already exists'
+        assert (data['message'] == "A user with the username "
+        f"{TEST_CREDENTIALS['username']} already exists")
 
     def test_post_missing_args(self, client):
         # missing username
         response = client.post(
             'user/register',
             json={
-                'username': TEST_USERNAME
+                'username': TEST_CREDENTIALS['username']
             }
         )
         assert response.status_code == 400
@@ -54,7 +54,7 @@ class TestUserRegister:
         response = client.post(
             'user/register',
             json={
-                'password': TEST_PASSWORD
+                'password': TEST_CREDENTIALS['password']
             }
         )
         assert response.status_code == 400
@@ -67,12 +67,12 @@ class TestUserRegister:
 class TestUserLogin:
     @pytest.fixture(autouse=True)
     def _set_auth_header(self, client):
-        self.auth_header = get_auth_header(client, TEST_CREDENTIALS_PAYLOAD)
+        self.auth_header = get_auth_header(client, TEST_CREDENTIALS)
 
     def test_post_correct_args(self, client):
         response = client.post(
             "/user/login",
-            json=TEST_CREDENTIALS_PAYLOAD
+            json=TEST_CREDENTIALS
         )
         assert response.status_code == 200
         data = response.get_json()
@@ -93,7 +93,7 @@ class TestUserLogin:
             "/user/login",
             json={
                 'username': bad_username,
-                'password': TEST_PASSWORD
+                'password': TEST_CREDENTIALS['password']
             }
         )
         assert response.status_code == 404
@@ -105,7 +105,7 @@ class TestUserLogin:
         response = client.post(
             '/user/login',
             json={
-                'username': TEST_USERNAME
+                'username': TEST_CREDENTIALS['username']
             }
         )
         assert response.status_code == 400
@@ -118,7 +118,7 @@ class TestUserLogin:
         response = client.post(
             '/user/login',
             json={
-                'password': TEST_PASSWORD
+                'password': TEST_CREDENTIALS['password']
             }
         )
         assert response.status_code == 400
@@ -131,7 +131,7 @@ class TestUserLogin:
 class TestUser:
     @pytest.fixture(autouse=True)
     def _set_auth_header(self, client):
-        self.auth_header = get_auth_header(client, TEST_CREDENTIALS_PAYLOAD)
+        self.auth_header = get_auth_header(client, TEST_CREDENTIALS)
 
     def test_get_correct_args(self, client):
         response = client.get(
@@ -146,7 +146,7 @@ class TestUser:
         for key in expected_keys:
             assert key in actual_keys 
 
-        assert data["username"] == TEST_USERNAME
+        assert data["username"] == TEST_CREDENTIALS['username']
         assert isinstance(data['id'], int)
         assert isinstance(data['favorites'], list)
         assert len(data['favorites']) == 0
@@ -177,7 +177,7 @@ class TestUser:
             "/user",
             json={
                 'username': bad_username,
-                'password': TEST_PASSWORD
+                'password': TEST_CREDENTIALS['password']
             }
         )
         assert response.status_code == 404
@@ -189,7 +189,7 @@ class TestUser:
         response = client.delete(
             '/user',
             json={
-                'username': TEST_USERNAME
+                'username': TEST_CREDENTIALS['username']
             }
         )
         assert response.status_code == 400
@@ -202,7 +202,7 @@ class TestUser:
         response = client.delete(
             '/user',
             json={
-                'password': TEST_PASSWORD
+                'password': TEST_CREDENTIALS['password']
             }
         )
         assert response.status_code == 400
@@ -214,7 +214,7 @@ class TestUser:
     def test_delete_correct_args(self, client):
         response = client.delete(
             "/user",
-            json=TEST_CREDENTIALS_PAYLOAD,
+            json=TEST_CREDENTIALS,
             headers=self.auth_header
         )
         assert response.status_code == 200

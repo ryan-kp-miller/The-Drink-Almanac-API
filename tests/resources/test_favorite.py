@@ -1,6 +1,6 @@
 import pytest
 from tests.resources import (
-    client, get_auth_header, TEST_CREDENTIALS_PAYLOAD
+    client, get_auth_header, TEST_CREDENTIALS
 )
 
 
@@ -10,7 +10,7 @@ class TestFavorite:
 
     @pytest.fixture(autouse=True)
     def _set_auth_header(self, client):
-        self.auth_header = get_auth_header(client, TEST_CREDENTIALS_PAYLOAD)
+        self.auth_header = get_auth_header(client, TEST_CREDENTIALS)
 
     def test_post_correct_args(self, client):
         response = client.post(
