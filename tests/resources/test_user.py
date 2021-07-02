@@ -1,7 +1,8 @@
 from json import loads
 import pytest
 from tests.resources import (
-    client, TEST_USERNAME, TEST_PASSWORD, TEST_CREDENTIALS_PAYLOAD
+    client, get_auth_header, TEST_USERNAME, TEST_PASSWORD, 
+    TEST_CREDENTIALS_PAYLOAD
 )
 
 
@@ -27,10 +28,11 @@ class TestUserRegister:
 
     def test_post_existing_username(self, client):
         # user created in previous test
-        response = client.post(
-            "/user/register",
-            json=TEST_CREDENTIALS_PAYLOAD
-        )
+        for _ in range(2):
+            response = client.post(
+                "/user/register",
+                json=TEST_CREDENTIALS_PAYLOAD
+            )
         assert response.status_code == 400
         data = loads(response.data)
         assert data['message'] == f'A user with the username {TEST_USERNAME} already exists'
@@ -64,6 +66,10 @@ class TestUserRegister:
 
 
 class TestUserLogin:
+    @pytest.fixture(autouse=True)
+    def _set_auth_header(self, client):
+        self.auth_header = get_auth_header(client, TEST_CREDENTIALS_PAYLOAD)
+
     def test_post_correct_args(self, client):
         response = client.post(
             "/user/login",
@@ -126,11 +132,7 @@ class TestUserLogin:
 class TestUser:
     @pytest.fixture(autouse=True)
     def _set_auth_header(self, client):
-        response = client.post("/user/login", json=TEST_CREDENTIALS_PAYLOAD)
-        data = loads(response.data)
-        self.auth_header = {
-            "Authorization": f"Bearer {data['access_token']}"
-        }
+        self.auth_header = get_auth_header(client, TEST_CREDENTIALS_PAYLOAD)
 
     def test_get_correct_args(self, client):
         response = client.get(
