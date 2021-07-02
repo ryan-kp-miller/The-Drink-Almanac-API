@@ -46,7 +46,7 @@ class Favorite(Resource):
     @api.doc(security="apiKey", responses={
         404: 'User for that JWT not found. Please remove the stale JWT',
         401: 'Missing Authorization Header',
-        400: 'The user has already favorited this drink',
+        400: 'User has already favorited this drink',
         201: 'Success',
     })
     def post(self, drink_id):
@@ -57,7 +57,7 @@ class Favorite(Resource):
 
         favorite = FavoriteModel.find_by_user_and_drink_ids(user_id, drink_id)
         if favorite:
-            return {'message': 'The user has already favorited this drink'}, 400
+            return {'message': 'User has already favorited this drink'}, 400
         favorite = FavoriteModel(user_id, drink_id)
         favorite.save_to_db()
         return favorite.json(), 201
