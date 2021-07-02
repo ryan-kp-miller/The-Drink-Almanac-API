@@ -9,3 +9,6 @@ venv
 
 # exclude sqlite db
 *.db
+
+# pytest-cov results
+.coverage
