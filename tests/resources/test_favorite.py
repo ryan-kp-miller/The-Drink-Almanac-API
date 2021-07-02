@@ -110,3 +110,58 @@ class TestFavorite:
     def test_get_invalid_drink_id(self, client):
         response = client.get('/favorite/test', headers=self.auth_header)
         assert response.status_code == 404
+
+    def test_delete_correct_args(self, client):
+        client.post(
+            f'/favorite/{self.TEST_DRINK_ID}', 
+            headers=self.auth_header
+        )
+        response = client.delete(
+            f'/favorite/{self.TEST_DRINK_ID}', 
+            headers=self.auth_header
+        )
+
+        assert response.status_code == 200
+        assert b"Success" in response.data
+
+        response = client.get(
+            f'/favorite/{self.TEST_DRINK_ID}', 
+            headers=self.auth_header
+        )
+        assert response.status_code == 404
+    
+    def test_delete_nonexistent_favorite(self, client):
+        response = client.delete(
+            '/favorite/1', 
+            headers=self.auth_header
+        )
+
+        assert response.status_code == 404
+        assert b'Favorite not found' in response.data
+    
+    def test_delete_missing_auth_header(self, client):
+        response = client.delete(f'/favorite/{self.TEST_DRINK_ID}')
+        assert response.status_code == 401
+        data = loads(response.data)
+        assert 'Missing Authorization Header' in data['msg']
+        
+    def test_delete_invalid_access_token(self, client):
+        # access token takend from jwt.io
+        bad_auth_header = {
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ"
+            "zdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM"
+            "5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        }
+        response = client.delete(
+            f"/favorite/{self.TEST_DRINK_ID}",
+            headers=bad_auth_header
+        )
+        assert response.status_code == 422
+        
+    def test_delete_missing_drink_id(self, client):
+        response = client.delete('/favorite/', headers=self.auth_header)
+        assert response.status_code == 404
+
+    def test_delete_invalid_drink_id(self, client):
+        response = client.delete('/favorite/test', headers=self.auth_header)
+        assert response.status_code == 404
