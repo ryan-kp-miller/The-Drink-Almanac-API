@@ -1,9 +1,8 @@
 import os
 from pytest import fixture
 from api.app import create_app
+from tests import TEST_USERNAME, TEST_PASSWORD
 
-TEST_USERNAME = "test"
-TEST_PASSWORD = "test"
 
 TEST_CREDENTIALS_PAYLOAD = {
     "username": TEST_USERNAME,
