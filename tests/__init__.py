@@ -1,2 +1,7 @@
 TEST_USERNAME = "test"
 TEST_PASSWORD = "test"
+
+TEST_CREDENTIALS_PAYLOAD = {
+    "username": TEST_USERNAME,
+    "password": TEST_PASSWORD
+}

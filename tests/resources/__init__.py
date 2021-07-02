@@ -1,13 +1,8 @@
 import os
 from pytest import fixture
 from api.app import create_app
-from tests import TEST_USERNAME, TEST_PASSWORD
+from tests import TEST_USERNAME, TEST_PASSWORD, TEST_CREDENTIALS_PAYLOAD
 
-
-TEST_CREDENTIALS_PAYLOAD = {
-    "username": TEST_USERNAME,
-    "password": TEST_PASSWORD
-}
 
 # setting scope to module allows us to use the same test database
 # across all tests in this file, so users persist across tests
