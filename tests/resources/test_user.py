@@ -104,7 +104,7 @@ class TestUserLogin:
     def test_post_missing_args(self, client):
         # missing username
         response = client.post(
-            'user/login',
+            '/user/login',
             json={
                 'username': TEST_USERNAME
             }
@@ -117,7 +117,7 @@ class TestUserLogin:
         
         # missing password
         response = client.post(
-            'user/login',
+            '/user/login',
             json={
                 'password': TEST_PASSWORD
             }
@@ -153,7 +153,7 @@ class TestUser:
         assert len(data['favorites']) == 0
 
     def test_get_missing_auth_header(self, client):
-        response = client.get('user')
+        response = client.get('/user')
         assert response.status_code == 401
         data = loads(response.data)
         assert 'Missing Authorization Header' in data['msg']
@@ -188,7 +188,7 @@ class TestUser:
     def test_delete_missing_args(self, client):
         # missing username
         response = client.delete(
-            'user',
+            '/user',
             json={
                 'username': TEST_USERNAME
             }
@@ -201,7 +201,7 @@ class TestUser:
         
         # missing password
         response = client.delete(
-            'user',
+            '/user',
             json={
                 'password': TEST_PASSWORD
             }
