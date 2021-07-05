@@ -214,8 +214,7 @@ class TestUser:
     def test_delete_correct_args(self, client):
         response = client.delete(
             "/user",
-            json=TEST_CREDENTIALS,
-            headers=self.auth_header
+            json=TEST_CREDENTIALS
         )
         assert response.status_code == 200
 
