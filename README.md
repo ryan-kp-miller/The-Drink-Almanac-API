@@ -14,7 +14,7 @@ I created a REST API to allow users to easily create an account and save drinks 
 - [Flask-RESTX](https://flask-restx.readthedocs.io/en/latest/index.html) - Flask extension used to create the API endpoints and models
 - [Pytest](https://docs.pytest.org/en/6.2.x/) - Framework used to test the API
 - [Heroku](https://www.heroku.com/about) - Platform as a Service used to serve the API
-- [The Drink Almanac](https://thedrinkalmanac.herokuapp.com) - React Single-Page app that consumes this API  
+- [The Drink Almanac](https://thedrinkalmanac.com) - React Single-Page app that consumes this API  
   - GitHub repo [here](https://github.com/ryan-kp-miller/The-Drink-Almanac)
 
 
