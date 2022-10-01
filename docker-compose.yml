@@ -1,0 +1,43 @@
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:1.0.4
+    ports:
+      - '4510-4597:4510-4597'
+    environment:
+      - DEFAULT_REGION=us-east-1
+      - REQUIRE_PRO
+      - LOCALSTACK_API_KEY=3tbXTmU4r1
+      - DISABLE_CORS_CHECKS=1
+      # - ENFORCE_IAM=1
+    volumes: 
+      - ./.config/localstack/init-scripts:/docker-entrypoint-initaws.d
+
+        
+  dynamodb-admin:
+    container_name: dynamodb-admin
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: "http://localstack:4566"
+      AWS_REGION: "us-east-1"
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  api:
+    container_name: the-drink-almanac-api
+    build: 
+      context: ./go_api
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - localstack
+
+networks:
+  default:
+    name: the-drink-almanac-net
+    driver: bridge
