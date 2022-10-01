@@ -12,3 +12,5 @@ venv
 
 # pytest-cov results
 .coverage
+
+.env
