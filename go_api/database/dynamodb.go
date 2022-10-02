@@ -1,33 +1,46 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 //CreateLocalClient creates a dynamodb client using environment variables
-func CreateLocalClient() (*dynamodb.DynamoDB, error) {
+func CreateLocalClient() (*dynamodb.Client, error) {
 	awsEndpoint := DefaultEnv("AWS_ENDPOINT", "http://localstack:4566")
 	awsRegion := DefaultEnv("AWS_REGION", "us-east-1")
 
-	fmt.Println(awsEndpoint)
-	fmt.Println("Creating new aws session")
-	sess, err := session.NewSession(&aws.Config{
-		Endpoint:    aws.String(awsEndpoint),
-		Region:      aws.String(awsRegion),
-		Credentials: credentials.NewStaticCredentials("test", "test", ""),
+	customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+		if service == dynamodb.ServiceID && region == "us-east-1" {
+			fmt.Println("aws custom endpoint resolver called correctly")
+			return aws.Endpoint{
+				PartitionID:       "aws",
+				URL:               awsEndpoint,
+				SigningRegion:     awsRegion,
+				HostnameImmutable: true,
+			}, nil
+		}
+		// returning EndpointNotFoundError will allow the service to fallback to it's default resolution
+		return aws.Endpoint{}, &aws.EndpointNotFoundError{}
 	})
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithEndpointResolverWithOptions(customResolver))
+
+	fmt.Println("Initializing config")
+	// cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		return nil, err
 	}
-	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-	return svc, nil
+
+	fmt.Println("Initializing DDB service")
+	return dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
+		o.EndpointResolver = dynamodb.EndpointResolverFromURL(awsEndpoint)
+	}), nil
 }
 
 // func CreateSession() (*session.Session, error) {
