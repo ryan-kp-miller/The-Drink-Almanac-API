@@ -21,10 +21,11 @@ func Start(port string) {
 	router.GET("", hello_world_handler)
 
 	// set up favorite endpoints
-	fr, _ := domain.NewFavoriteRepositoryDDB()
+	fr, _ := domain.NewFavoriteRepositoryStub()
 	fs := service.NewDefaultFavoriteService(fr)
 	fh := handler.FavoriteHandlers{Service: fs}
 	router.GET("/favorites", fh.FindAllFavorites)
+	router.GET("favorites/:userId", fh.FindFavoritesByUser)
 
 	// set up user endpoints
 	ur, _ := domain.NewUserRepositoryDDB()

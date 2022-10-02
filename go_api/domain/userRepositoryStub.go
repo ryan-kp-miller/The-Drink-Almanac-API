@@ -8,7 +8,7 @@ func (s UserRepositoryStub) FindAll() ([]User, error) {
 	return s.users, nil
 }
 
-func NewUserRepositoryStub() UserRepositoryStub {
+func NewUserRepositoryStub() (UserRepositoryStub, error) {
 	users := []User{
 		{
 			Id:       0,
@@ -26,5 +26,5 @@ func NewUserRepositoryStub() UserRepositoryStub {
 			Password: "test2",
 		},
 	}
-	return UserRepositoryStub{users: users}
+	return UserRepositoryStub{users: users}, nil
 }

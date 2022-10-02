@@ -1,5 +1,10 @@
 package domain
 
+import (
+	"fmt"
+	"strconv"
+)
+
 type FavoriteRepositoryStub struct {
 	favorites []Favorite
 }
@@ -8,7 +13,20 @@ func (s FavoriteRepositoryStub) FindAll() ([]Favorite, error) {
 	return s.favorites, nil
 }
 
-func NewFavoriteRepositoryStub() FavoriteRepositoryStub {
+func (s FavoriteRepositoryStub) FindFavoritesByUser(userId int) ([]Favorite, error) {
+	filteredFavorites := make([]Favorite, 0)
+	for _, favorite := range s.favorites {
+		if favorite.UserId == userId {
+			filteredFavorites = append(filteredFavorites, favorite)
+		}
+	}
+	if len(filteredFavorites) == 0 {
+		return nil, fmt.Errorf("no favorites found for user with id %s", strconv.Itoa(userId))
+	}
+	return filteredFavorites, nil
+}
+
+func NewFavoriteRepositoryStub() (FavoriteRepositoryStub, error) {
 	favorites := []Favorite{
 		{
 			Id:      0,
@@ -28,5 +46,5 @@ func NewFavoriteRepositoryStub() FavoriteRepositoryStub {
 	}
 	return FavoriteRepositoryStub{
 		favorites: favorites,
-	}
+	}, nil
 }

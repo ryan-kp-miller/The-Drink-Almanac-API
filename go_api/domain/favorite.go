@@ -8,4 +8,5 @@ type Favorite struct {
 
 type FavoriteRepository interface {
 	FindAll() ([]Favorite, error)
+	FindFavoritesByUser(userId int) ([]Favorite, error)
 }
