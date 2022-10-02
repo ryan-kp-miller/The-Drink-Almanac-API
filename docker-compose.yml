@@ -2,17 +2,17 @@ services:
   localstack:
     container_name: localstack
     image: localstack/localstack:1.0.4
+    hostname: localstack
     ports:
-      - '4510-4597:4510-4597'
+      - 4566:4566 # All servics will now go through the same port.
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
     environment:
-      - DEFAULT_REGION=us-east-1
-      - REQUIRE_PRO
       - LOCALSTACK_API_KEY=3tbXTmU4r1
       - DISABLE_CORS_CHECKS=1
-      # - ENFORCE_IAM=1
+      - REQUIRE_PRO
+      - SERVICES=dynamodb
     volumes: 
       - ./.config/localstack/init-scripts:/docker-entrypoint-initaws.d
-
         
   dynamodb-admin:
     container_name: dynamodb-admin
@@ -31,7 +31,7 @@ services:
     build: 
       context: ./go_api
     ports:
-      - "8080:8080"
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
@@ -39,5 +39,5 @@ services:
 
 networks:
   default:
-    name: the-drink-almanac-net
+    name: drink-almanac-net
     driver: bridge

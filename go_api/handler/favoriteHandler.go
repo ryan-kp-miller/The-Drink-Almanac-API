@@ -14,9 +14,7 @@ type FavoriteHandlers struct {
 func (fh *FavoriteHandlers) FindAllFavorites(c *gin.Context) {
 	favorites, err := fh.Service.FindAllFavorites()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 	c.JSON(http.StatusOK, favorites)
 }

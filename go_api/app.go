@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"the-drink-almanac-api/domain"
 	"the-drink-almanac-api/handler"
 	"the-drink-almanac-api/service"
@@ -15,14 +14,14 @@ type HelloWorld struct {
 	Hello string `json:"hello"`
 }
 
-func Start(port int) {
+func Start(port string) {
 	router := gin.Default()
 
 	// set up default endpoint
 	router.GET("", hello_world_handler)
 
 	// set up favorite endpoints
-	fr := domain.NewFavoriteRepositoryStub()
+	fr, _ := domain.NewFavoriteRepositoryDDB()
 	fs := service.NewDefaultFavoriteService(fr)
 	fh := handler.FavoriteHandlers{Service: fs}
 	router.GET("/favorites", fh.FindAllFavorites)
@@ -34,8 +33,7 @@ func Start(port int) {
 	router.GET("/users", uh.FindAllUsers)
 
 	// running the app
-	port_str := strconv.Itoa(port)
-	router.Run(fmt.Sprintf(":%s", port_str))
+	router.Run(fmt.Sprintf(":%s", port))
 }
 
 func hello_world_handler(c *gin.Context) {
