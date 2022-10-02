@@ -27,7 +27,7 @@ func Start(port string) {
 	router.GET("/favorites", fh.FindAllFavorites)
 
 	// set up user endpoints
-	ur := domain.NewUserRepositoryStub()
+	ur, _ := domain.NewUserRepositoryDDB()
 	us := service.NewDefaultUserService(ur)
 	uh := handler.UserHandlers{Service: us}
 	router.GET("/users", uh.FindAllUsers)
