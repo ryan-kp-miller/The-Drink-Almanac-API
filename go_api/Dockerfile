@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -mod=mod -o /api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -mod=mod -o /api
 
-ENTRYPOINT [ "/api" ]
+FROM scratch
+COPY --from=base /api /usr/bin/api
+ENTRYPOINT [ "api" ]
