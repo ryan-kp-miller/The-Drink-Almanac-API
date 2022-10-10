@@ -39,7 +39,6 @@ To stop the api, run the `make down` command.
     - `DELETE`: delete a favorite for a given user and drink
 
 
-
 ## To Do
 
 - Create endpoints for:
@@ -47,6 +46,7 @@ To stop the api, run the `make down` command.
   - Create new users
   - Create new favorites
     - Add validation logic inside the favorite service to verify that a favorite doesn't exist for 
+- Set up Data Transfer Object types for request bodies and responses
 - Update existing endpoints to use user authorization (access tokens)
 - Write unit tests (80% or higher coverage)
 - Add better logging using Gin's built-in logger
