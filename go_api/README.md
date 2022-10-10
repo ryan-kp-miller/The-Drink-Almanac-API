@@ -46,8 +46,10 @@ To stop the api, run the `make down` command.
   - User authentication
   - Create new users
   - Create new favorites
+    - Add validation logic inside the favorite service to verify that a favorite doesn't exist for 
 - Update existing endpoints to use user authorization (access tokens)
 - Write unit tests (80% or higher coverage)
+- Add better logging using Gin's built-in logger
 - Deploy API
 - Set up CI/CD for automatically deploying changes
 - Add code coverage badge to repo's README
