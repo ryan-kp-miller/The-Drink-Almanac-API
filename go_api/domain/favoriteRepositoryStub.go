@@ -9,11 +9,11 @@ type FavoriteRepositoryStub struct {
 	favorites []Favorite
 }
 
-func (s FavoriteRepositoryStub) FindAll() ([]Favorite, error) {
+func (s *FavoriteRepositoryStub) FindAll() ([]Favorite, error) {
 	return s.favorites, nil
 }
 
-func (s FavoriteRepositoryStub) FindFavoritesByUser(userId int) ([]Favorite, error) {
+func (s *FavoriteRepositoryStub) FindFavoritesByUser(userId int) ([]Favorite, error) {
 	filteredFavorites := make([]Favorite, 0)
 	for _, favorite := range s.favorites {
 		if favorite.UserId == userId {
@@ -26,7 +26,12 @@ func (s FavoriteRepositoryStub) FindFavoritesByUser(userId int) ([]Favorite, err
 	return filteredFavorites, nil
 }
 
-func NewFavoriteRepositoryStub() (FavoriteRepositoryStub, error) {
+func (s *FavoriteRepositoryStub) CreateNewFavorite(favorite Favorite) error {
+	s.favorites = append(s.favorites, favorite)
+	return nil
+}
+
+func NewFavoriteRepositoryStub() (*FavoriteRepositoryStub, error) {
 	favorites := []Favorite{
 		{
 			Id:      0,
@@ -44,7 +49,7 @@ func NewFavoriteRepositoryStub() (FavoriteRepositoryStub, error) {
 			UserId:  1,
 		},
 	}
-	return FavoriteRepositoryStub{
+	return &FavoriteRepositoryStub{
 		favorites: favorites,
 	}, nil
 }

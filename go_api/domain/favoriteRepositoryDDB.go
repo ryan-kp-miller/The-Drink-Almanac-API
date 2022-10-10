@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"the-drink-almanac-api/database"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -58,6 +59,10 @@ func (frd *FavoriteRepositoryDDB) FindFavoritesByUser(userId int) ([]Favorite, e
 	}
 
 	return favorites, nil
+}
+
+func (frd *FavoriteRepositoryDDB) CreateNewFavorite(favorite Favorite) error {
+	return fmt.Errorf("not implemented yet")
 }
 
 func NewFavoriteRepositoryDDB() (*FavoriteRepositoryDDB, error) {

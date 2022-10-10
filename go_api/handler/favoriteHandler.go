@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"the-drink-almanac-api/service"
@@ -35,7 +36,12 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 
 	favorites, err := fh.Service.FindFavoritesByUser(userId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	if len(favorites) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("no favorites were found for user with id %s", userIdStr)})
 		return
 	}
 
