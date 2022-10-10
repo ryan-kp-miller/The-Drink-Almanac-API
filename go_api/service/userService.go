@@ -7,13 +7,13 @@ type UserService interface {
 }
 
 type DefaultUserService struct {
-	repo model.UserStore
+	store model.UserStore
 }
 
 func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
-	return s.repo.FindAll()
+	return s.store.FindAll()
 }
 
-func NewDefaultUserService(repository model.UserStore) DefaultUserService {
-	return DefaultUserService{repo: repository}
+func NewDefaultUserService(store model.UserStore) DefaultUserService {
+	return DefaultUserService{store: store}
 }

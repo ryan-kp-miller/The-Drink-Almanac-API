@@ -9,23 +9,26 @@ type FavoriteService interface {
 }
 
 type DefaultFavoriteService struct {
-	repo model.FavoriteStore
+	store model.FavoriteStore
 }
 
 func (s DefaultFavoriteService) FindAllFavorites() ([]model.Favorite, error) {
-	return s.repo.FindAll()
+	return s.store.FindAll()
 }
 
 func (s DefaultFavoriteService) FindFavoritesByUser(userId int) ([]model.Favorite, error) {
-	return s.repo.FindFavoritesByUser(userId)
+	return s.store.FindFavoritesByUser(userId)
 }
 
+// CreateNewFavorite checks if a favorite already exists in the FavoriteStore
 func (s DefaultFavoriteService) CreateNewFavorite(favorite model.Favorite) error {
+
 	// need to add logic to check if a favorite already exists with the same user and drink ids
-	// if it doesn't, then determine an id for the favorite and store it in the repo
-	return s.repo.CreateNewFavorite(favorite)
+	// if it doesn't, then determine an id for the favorite and store it in the store
+
+	return s.store.CreateNewFavorite(favorite)
 }
 
-func NewDefaultFavoriteService(repository model.FavoriteStore) DefaultFavoriteService {
-	return DefaultFavoriteService{repo: repository}
+func NewDefaultFavoriteService(store model.FavoriteStore) DefaultFavoriteService {
+	return DefaultFavoriteService{store: store}
 }
