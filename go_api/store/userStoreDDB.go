@@ -1,19 +1,19 @@
-package domain
+package store
 
 import (
 	"context"
-	"the-drink-almanac-api/database"
+	"the-drink-almanac-api/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-type UserRepositoryDDB struct {
+type UserStoreDDB struct {
 	dynamodbClient *dynamodb.Client
 }
 
-func (urd *UserRepositoryDDB) FindAll() ([]User, error) {
+func (urd *UserStoreDDB) FindAll() ([]model.User, error) {
 	scanInput := dynamodb.ScanInput{
 		TableName: aws.String("the-drink-almanac-users"),
 	}
@@ -22,7 +22,7 @@ func (urd *UserRepositoryDDB) FindAll() ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	users := []User{}
+	users := []model.User{}
 	err = attributevalue.UnmarshalListOfMaps(scanOutput.Items, &users)
 	if err != nil {
 		return nil, err
@@ -31,9 +31,9 @@ func (urd *UserRepositoryDDB) FindAll() ([]User, error) {
 	return users, nil
 }
 
-func NewUserRepositoryDDB() (*UserRepositoryDDB, error) {
-	ddbClient, err := database.CreateLocalClient()
-	return &UserRepositoryDDB{
+func NewUserStoreDDB() (*UserStoreDDB, error) {
+	ddbClient, err := CreateLocalClient()
+	return &UserStoreDDB{
 		dynamodbClient: ddbClient,
 	}, err
 }

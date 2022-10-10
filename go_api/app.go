@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"the-drink-almanac-api/domain"
 	"the-drink-almanac-api/handler"
 	"the-drink-almanac-api/service"
+	"the-drink-almanac-api/store"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,14 +21,14 @@ func Start(port string) {
 	router.GET("", hello_world_handler)
 
 	// set up favorite endpoints
-	fr, _ := domain.NewFavoriteRepositoryDDB()
+	fr, _ := store.NewFavoriteStoreDDB()
 	fs := service.NewDefaultFavoriteService(fr)
 	fh := handler.FavoriteHandlers{Service: fs}
 	router.GET("/favorites", fh.FindAllFavorites)
 	router.GET("favorites/:userId", fh.FindFavoritesByUser)
 
 	// set up user endpoints
-	ur, _ := domain.NewUserRepositoryDDB()
+	ur, _ := store.NewUserStoreDDB()
 	us := service.NewDefaultUserService(ur)
 	uh := handler.UserHandlers{Service: us}
 	router.GET("/users", uh.FindAllUsers)

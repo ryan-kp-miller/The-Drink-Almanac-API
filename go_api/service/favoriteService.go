@@ -1,31 +1,31 @@
 package service
 
-import "the-drink-almanac-api/domain"
+import "the-drink-almanac-api/model"
 
 type FavoriteService interface {
-	FindAllFavorites() ([]domain.Favorite, error)
-	FindFavoritesByUser(userID int) ([]domain.Favorite, error)
-	CreateNewFavorite(favorite domain.Favorite) error
+	FindAllFavorites() ([]model.Favorite, error)
+	FindFavoritesByUser(userID int) ([]model.Favorite, error)
+	CreateNewFavorite(favorite model.Favorite) error
 }
 
 type DefaultFavoriteService struct {
-	repo domain.FavoriteRepository
+	repo model.FavoriteStore
 }
 
-func (s DefaultFavoriteService) FindAllFavorites() ([]domain.Favorite, error) {
+func (s DefaultFavoriteService) FindAllFavorites() ([]model.Favorite, error) {
 	return s.repo.FindAll()
 }
 
-func (s DefaultFavoriteService) FindFavoritesByUser(userId int) ([]domain.Favorite, error) {
+func (s DefaultFavoriteService) FindFavoritesByUser(userId int) ([]model.Favorite, error) {
 	return s.repo.FindFavoritesByUser(userId)
 }
 
-func (s DefaultFavoriteService) CreateNewFavorite(favorite domain.Favorite) error {
+func (s DefaultFavoriteService) CreateNewFavorite(favorite model.Favorite) error {
 	// need to add logic to check if a favorite already exists with the same user and drink ids
 	// if it doesn't, then determine an id for the favorite and store it in the repo
 	return s.repo.CreateNewFavorite(favorite)
 }
 
-func NewDefaultFavoriteService(repository domain.FavoriteRepository) DefaultFavoriteService {
+func NewDefaultFavoriteService(repository model.FavoriteStore) DefaultFavoriteService {
 	return DefaultFavoriteService{repo: repository}
 }

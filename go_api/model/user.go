@@ -1,4 +1,4 @@
-package domain
+package model
 
 type User struct {
 	Id       int    `json:"id" db:"id"`
@@ -6,6 +6,6 @@ type User struct {
 	Password string `json:"password" db:"password"`
 }
 
-type UserRepository interface {
+type UserStore interface {
 	FindAll() ([]User, error)
 }

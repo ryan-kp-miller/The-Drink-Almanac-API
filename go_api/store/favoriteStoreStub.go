@@ -1,20 +1,21 @@
-package domain
+package store
 
 import (
 	"fmt"
 	"strconv"
+	"the-drink-almanac-api/model"
 )
 
-type FavoriteRepositoryStub struct {
-	favorites []Favorite
+type FavoriteStoreStub struct {
+	favorites []model.Favorite
 }
 
-func (s *FavoriteRepositoryStub) FindAll() ([]Favorite, error) {
+func (s *FavoriteStoreStub) FindAll() ([]model.Favorite, error) {
 	return s.favorites, nil
 }
 
-func (s *FavoriteRepositoryStub) FindFavoritesByUser(userId int) ([]Favorite, error) {
-	filteredFavorites := make([]Favorite, 0)
+func (s *FavoriteStoreStub) FindFavoritesByUser(userId int) ([]model.Favorite, error) {
+	filteredFavorites := make([]model.Favorite, 0)
 	for _, favorite := range s.favorites {
 		if favorite.UserId == userId {
 			filteredFavorites = append(filteredFavorites, favorite)
@@ -26,13 +27,13 @@ func (s *FavoriteRepositoryStub) FindFavoritesByUser(userId int) ([]Favorite, er
 	return filteredFavorites, nil
 }
 
-func (s *FavoriteRepositoryStub) CreateNewFavorite(favorite Favorite) error {
+func (s *FavoriteStoreStub) CreateNewFavorite(favorite model.Favorite) error {
 	s.favorites = append(s.favorites, favorite)
 	return nil
 }
 
-func NewFavoriteRepositoryStub() (*FavoriteRepositoryStub, error) {
-	favorites := []Favorite{
+func NewFavoriteStoreStub() (*FavoriteStoreStub, error) {
+	favorites := []model.Favorite{
 		{
 			Id:      0,
 			DrinkId: 0,
@@ -49,7 +50,7 @@ func NewFavoriteRepositoryStub() (*FavoriteRepositoryStub, error) {
 			UserId:  1,
 		},
 	}
-	return &FavoriteRepositoryStub{
+	return &FavoriteStoreStub{
 		favorites: favorites,
 	}, nil
 }

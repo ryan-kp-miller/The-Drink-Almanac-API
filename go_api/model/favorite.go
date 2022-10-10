@@ -1,4 +1,4 @@
-package domain
+package model
 
 type Favorite struct {
 	Id      int `json:"id" db:"id"`
@@ -6,7 +6,7 @@ type Favorite struct {
 	UserId  int `json:"userId" db:"user_id"`
 }
 
-type FavoriteRepository interface {
+type FavoriteStore interface {
 	FindAll() ([]Favorite, error)
 	FindFavoritesByUser(userId int) ([]Favorite, error)
 	// need to add a method to determine if a record already exists with a given user id and drink id

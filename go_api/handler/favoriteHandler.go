@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"the-drink-almanac-api/domain"
+	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -50,7 +50,7 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 }
 
 func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
-	var newFavorite domain.Favorite
+	var newFavorite model.Favorite
 	if err := c.BindJSON(&newFavorite); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "the request body must contain id, drink_id, and user_id integer fields"})
 		return

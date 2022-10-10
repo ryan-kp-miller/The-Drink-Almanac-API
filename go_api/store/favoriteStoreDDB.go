@@ -1,9 +1,9 @@
-package domain
+package store
 
 import (
 	"context"
 	"fmt"
-	"the-drink-almanac-api/database"
+	"the-drink-almanac-api/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -11,11 +11,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-type FavoriteRepositoryDDB struct {
+type FavoriteStoreDDB struct {
 	dynamodbClient *dynamodb.Client
 }
 
-func (frd *FavoriteRepositoryDDB) FindAll() ([]Favorite, error) {
+func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
 	scanInput := dynamodb.ScanInput{
 		TableName: aws.String("the-drink-almanac-favorites"),
 	}
@@ -24,7 +24,7 @@ func (frd *FavoriteRepositoryDDB) FindAll() ([]Favorite, error) {
 	if err != nil {
 		return nil, err
 	}
-	favorites := []Favorite{}
+	favorites := []model.Favorite{}
 	err = attributevalue.UnmarshalListOfMaps(scanOutput.Items, &favorites)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (frd *FavoriteRepositoryDDB) FindAll() ([]Favorite, error) {
 	return favorites, nil
 }
 
-func (frd *FavoriteRepositoryDDB) FindFavoritesByUser(userId int) ([]Favorite, error) {
+func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId int) ([]model.Favorite, error) {
 	filterExpression, err := expression.NewBuilder().WithFilter(
 		expression.Equal(expression.Name("user_id"), expression.Value(userId)),
 	).Build()
@@ -52,7 +52,7 @@ func (frd *FavoriteRepositoryDDB) FindFavoritesByUser(userId int) ([]Favorite, e
 	if err != nil {
 		return nil, err
 	}
-	favorites := []Favorite{}
+	favorites := []model.Favorite{}
 	err = attributevalue.UnmarshalListOfMaps(scanOutput.Items, &favorites)
 	if err != nil {
 		return nil, err
@@ -61,13 +61,13 @@ func (frd *FavoriteRepositoryDDB) FindFavoritesByUser(userId int) ([]Favorite, e
 	return favorites, nil
 }
 
-func (frd *FavoriteRepositoryDDB) CreateNewFavorite(favorite Favorite) error {
+func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
 	return fmt.Errorf("not implemented yet")
 }
 
-func NewFavoriteRepositoryDDB() (*FavoriteRepositoryDDB, error) {
-	ddbClient, err := database.CreateLocalClient()
-	return &FavoriteRepositoryDDB{
+func NewFavoriteStoreDDB() (*FavoriteStoreDDB, error) {
+	ddbClient, err := CreateLocalClient()
+	return &FavoriteStoreDDB{
 		dynamodbClient: ddbClient,
 	}, err
 }

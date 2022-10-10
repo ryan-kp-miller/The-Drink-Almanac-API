@@ -1,19 +1,19 @@
 package service
 
-import "the-drink-almanac-api/domain"
+import "the-drink-almanac-api/model"
 
 type UserService interface {
-	FindAllUsers() ([]domain.User, error)
+	FindAllUsers() ([]model.User, error)
 }
 
 type DefaultUserService struct {
-	repo domain.UserRepository
+	repo model.UserStore
 }
 
-func (s DefaultUserService) FindAllUsers() ([]domain.User, error) {
+func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
 	return s.repo.FindAll()
 }
 
-func NewDefaultUserService(repository domain.UserRepository) DefaultUserService {
+func NewDefaultUserService(repository model.UserStore) DefaultUserService {
 	return DefaultUserService{repo: repository}
 }
