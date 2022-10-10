@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"the-drink-almanac-api/domain"
 	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -46,4 +47,17 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, favorites)
+}
+
+func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
+	var newFavorite domain.Favorite
+	if err := c.BindJSON(&newFavorite); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "the request body must contain id, drink_id, and user_id integer fields"})
+		return
+	}
+
+	if err := fh.Service.CreateNewFavorite(newFavorite); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("unable to add the new favorite: %s", err.Error())})
+		return
+	}
 }
