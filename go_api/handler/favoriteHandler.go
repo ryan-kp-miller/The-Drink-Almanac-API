@@ -3,8 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
-	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/dto"
 	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -23,15 +22,9 @@ func (fh *FavoriteHandlers) FindAllFavorites(c *gin.Context) {
 }
 
 func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
-	userIdStr := c.Param("userId")
-	if userIdStr == "" {
+	userId := c.Param("userId")
+	if userId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you must specify a user id"})
-		return
-	}
-
-	userId, err := strconv.Atoi(userIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "the id must be an integer"})
 		return
 	}
 
@@ -42,7 +35,7 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 	}
 
 	if len(favorites) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("no favorites were found for user with id %s", userIdStr)})
+		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("no favorites were found for user with id %s", userId)})
 		return
 	}
 
@@ -50,13 +43,14 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 }
 
 func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
-	var newFavorite model.Favorite
-	if err := c.BindJSON(&newFavorite); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "the request body must contain id, drink_id, and user_id integer fields"})
+	var newFavoritePostRequest dto.FavoritePostRequest
+	if err := c.BindJSON(&newFavoritePostRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "the request body must contain drink_id and user_id string fields"})
 		return
 	}
 
-	if err := fh.Service.CreateNewFavorite(newFavorite); err != nil {
+	_, err := fh.Service.CreateNewFavorite(newFavoritePostRequest.UserId, newFavoritePostRequest.DrinkId)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("unable to add the new favorite: %s", err.Error())})
 		return
 	}

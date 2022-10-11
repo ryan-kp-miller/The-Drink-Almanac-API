@@ -41,6 +41,7 @@ To stop the api, run the `make down` command.
 
 ## To Do
 
+- Troubleshoot why drinkId and userId are no longer coming through since they were changed to strings
 - Create endpoints for:
   - User authentication
   - Create new users

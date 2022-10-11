@@ -33,7 +33,7 @@ func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
 	return favorites, nil
 }
 
-func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId int) ([]model.Favorite, error) {
+func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
 	filterExpression, err := expression.NewBuilder().WithFilter(
 		expression.Equal(expression.Name("user_id"), expression.Value(userId)),
 	).Build()

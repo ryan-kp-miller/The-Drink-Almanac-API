@@ -2,7 +2,6 @@ package store
 
 import (
 	"fmt"
-	"strconv"
 	"the-drink-almanac-api/model"
 )
 
@@ -14,7 +13,7 @@ func (s *FavoriteStoreStub) FindAll() ([]model.Favorite, error) {
 	return s.favorites, nil
 }
 
-func (s *FavoriteStoreStub) FindFavoritesByUser(userId int) ([]model.Favorite, error) {
+func (s *FavoriteStoreStub) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
 	filteredFavorites := make([]model.Favorite, 0)
 	for _, favorite := range s.favorites {
 		if favorite.UserId == userId {
@@ -22,7 +21,7 @@ func (s *FavoriteStoreStub) FindFavoritesByUser(userId int) ([]model.Favorite, e
 		}
 	}
 	if len(filteredFavorites) == 0 {
-		return nil, fmt.Errorf("no favorites found for user with id %s", strconv.Itoa(userId))
+		return nil, fmt.Errorf("no favorites found for user with id %s", userId)
 	}
 	return filteredFavorites, nil
 }
@@ -35,19 +34,19 @@ func (s *FavoriteStoreStub) CreateNewFavorite(favorite model.Favorite) error {
 func NewFavoriteStoreStub() (*FavoriteStoreStub, error) {
 	favorites := []model.Favorite{
 		{
-			Id:      0,
-			DrinkId: 0,
-			UserId:  0,
+			Id:      "0",
+			DrinkId: "0",
+			UserId:  "0",
 		},
 		{
-			Id:      1,
-			DrinkId: 1,
-			UserId:  0,
+			Id:      "1",
+			DrinkId: "1",
+			UserId:  "0",
 		},
 		{
-			Id:      2,
-			DrinkId: 1,
-			UserId:  1,
+			Id:      "2",
+			DrinkId: "1",
+			UserId:  "1",
 		},
 	}
 	return &FavoriteStoreStub{

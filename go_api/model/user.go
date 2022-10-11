@@ -1,9 +1,9 @@
 package model
 
 type User struct {
-	Id       int    `json:"id" db:"id"`
-	Username string `json:"username" db:"username"`
-	Password string `json:"password" db:"password"`
+	Id       string `json:"id" dynamodbav:"id"`
+	Username string `json:"username" dynamodbav:"username"`
+	Password string `json:"password" dynamodbav:"password"`
 }
 
 type UserStore interface {

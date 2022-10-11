@@ -1,15 +1,13 @@
 package model
 
 type Favorite struct {
-	Id      int `json:"id" db:"id"`
-	DrinkId int `json:"drinkId" db:"drink_id"`
-	UserId  int `json:"userId" db:"user_id"`
+	Id      string `json:"id" dynamodbav:"id"`
+	UserId  string `json:"userId" dynamodbav:"user_id"`
+	DrinkId string `json:"drinkId" dynamodbav:"drink_id"`
 }
 
 type FavoriteStore interface {
 	FindAll() ([]Favorite, error)
-	FindFavoritesByUser(userId int) ([]Favorite, error)
-	// need to add a method to determine if a record already exists with a given user id and drink id
-	// need to add a method to find the max favorite id in order to determine what to use for new favorites
+	FindFavoritesByUser(userId string) ([]Favorite, error)
 	CreateNewFavorite(favorite Favorite) error
 }

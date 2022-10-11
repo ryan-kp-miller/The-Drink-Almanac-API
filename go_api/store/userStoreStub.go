@@ -13,17 +13,17 @@ func (s UserStoreStub) FindAll() ([]model.User, error) {
 func NewUserStoreStub() (UserStoreStub, error) {
 	users := []model.User{
 		{
-			Id:       0,
+			Id:       "0",
 			Username: "test0",
 			Password: "test0",
 		},
 		{
-			Id:       1,
+			Id:       "1",
 			Username: "test1",
 			Password: "test1",
 		},
 		{
-			Id:       2,
+			Id:       "2",
 			Username: "test2",
 			Password: "test2",
 		},
