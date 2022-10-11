@@ -31,6 +31,26 @@ func (s *FavoriteStoreStub) CreateNewFavorite(favorite model.Favorite) error {
 	return nil
 }
 
+func (s *FavoriteStoreStub) DeleteFavorite(id string) error {
+	newFavorites := make([]model.Favorite, len(s.favorites)-1)
+
+	wasFavoriteFound := false
+	for _, existingFavorite := range s.favorites {
+		if existingFavorite.Id == id {
+			wasFavoriteFound = true
+		} else {
+			newFavorites = append(newFavorites, existingFavorite)
+		}
+	}
+
+	if wasFavoriteFound {
+		s.favorites = newFavorites
+		return nil
+	}
+
+	return fmt.Errorf("no favorite exists with the id %s", id)
+}
+
 func NewFavoriteStoreStub() (*FavoriteStoreStub, error) {
 	favorites := []model.Favorite{
 		{

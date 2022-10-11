@@ -32,22 +32,25 @@ To stop the api, run the `make down` command.
 - `/user` (will be changed to use access tokens)
 - `/user/login` (not implemented yet)
 - `/user/register` (not implemented yet)
-- `/favorites/{user_id}` (will be changed to use access tokens)
-- `/favorite/{drink_id}` (will be changed to use access tokens)
+- `/favorite`
   - HTTP Commands Allowed:
+    - `GET`: get all favorites for a user
+      - User id provided in the url (will be changed to use access tokens)
     - `POST`: create a new favorite for a given user and drink
-    - `DELETE`: delete a favorite for a given user and drink
+      - user id and drink id provided in the request body
+    - `DELETE`: delete a favorite
+      - favorite id provided in the url
 
 
 ## To Do
 
 - [x] Troubleshoot why drinkId and userId are no longer coming through since they were changed to strings
 - Create endpoints for:
-  - [ ] User authentication
   - [ ] Create new users
   - [x] Create new favorites
     - [x] Add validation logic inside the favorite service to verify that a favorite doesn't exist before creating a new one
-  - [ ] Delete a favorite using the favorite's id
+  - [x] Delete a favorite using the favorite's id
+  - [ ] User authentication
 - [ ] Set up Data Transfer Object types for request bodies and responses
 - [ ] Update existing endpoints to use user authorization (access tokens)
 - [ ] Move hardcoded table names and other env variables to an app config struct

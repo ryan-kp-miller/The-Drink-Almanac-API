@@ -11,6 +11,7 @@ type FavoriteService interface {
 	FindAllFavorites() ([]model.Favorite, error)
 	FindFavoritesByUser(userID string) ([]model.Favorite, error)
 	CreateNewFavorite(userId, drinkId string) (*model.Favorite, error)
+	DeleteFavorite(id string) error
 }
 
 type DefaultFavoriteService struct {
@@ -59,6 +60,10 @@ func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*mode
 	}
 
 	return &newFavorite, nil
+}
+
+func (s DefaultFavoriteService) DeleteFavorite(id string) error {
+	return s.store.DeleteFavorite(id)
 }
 
 func NewDefaultFavoriteService(store model.FavoriteStore) DefaultFavoriteService {

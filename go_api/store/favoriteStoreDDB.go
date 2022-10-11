@@ -77,6 +77,16 @@ func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
 	return err
 }
 
+func (frd *FavoriteStoreDDB) DeleteFavorite(id string) error {
+	_, err := frd.dynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+		TableName: aws.String(FAVORITES_TABLE_NAME),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: id},
+		},
+	})
+	return err
+}
+
 func NewFavoriteStoreDDB() (*FavoriteStoreDDB, error) {
 	ddbClient, err := CreateLocalClient()
 	return &FavoriteStoreDDB{

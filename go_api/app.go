@@ -28,6 +28,7 @@ func Start(port string) {
 	favoriteRouteGroup.GET("/", fh.FindAllFavorites)
 	favoriteRouteGroup.GET("/:userId", fh.FindFavoritesByUser)
 	favoriteRouteGroup.POST("/", fh.CreateNewFavorite)
+	favoriteRouteGroup.DELETE("/:favoriteId", fh.DeleteFavorite)
 
 	// set up user endpoints
 	ur, _ := store.NewUserStoreDDB()

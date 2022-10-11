@@ -57,3 +57,19 @@ func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, newFavorite)
 }
+
+func (fh *FavoriteHandlers) DeleteFavorite(c *gin.Context) {
+	favoriteId := c.Param("favoriteId")
+	if favoriteId == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "you must specify an id"})
+		return
+	}
+
+	err := fh.Service.DeleteFavorite(favoriteId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "the favorite was deleted"})
+}
