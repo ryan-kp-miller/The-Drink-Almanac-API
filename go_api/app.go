@@ -24,8 +24,10 @@ func Start(port string) {
 	fr, _ := store.NewFavoriteStoreDDB()
 	fs := service.NewDefaultFavoriteService(fr)
 	fh := handler.FavoriteHandlers{Service: fs}
-	router.GET("/favorites", fh.FindAllFavorites)
-	router.GET("favorites/:userId", fh.FindFavoritesByUser)
+	favoriteRouteGroup := router.Group("/favorite")
+	favoriteRouteGroup.GET("/", fh.FindAllFavorites)
+	favoriteRouteGroup.GET("/:userId", fh.FindFavoritesByUser)
+	favoriteRouteGroup.POST("/", fh.CreateNewFavorite)
 
 	// set up user endpoints
 	ur, _ := store.NewUserStoreDDB()

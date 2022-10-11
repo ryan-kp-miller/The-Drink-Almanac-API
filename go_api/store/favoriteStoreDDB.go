@@ -2,13 +2,17 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"the-drink-almanac-api/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+)
+
+var (
+	FAVORITES_TABLE_NAME string = "the-drink-almanac-favorites"
 )
 
 type FavoriteStoreDDB struct {
@@ -42,7 +46,7 @@ func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorit
 	}
 
 	scanInput := dynamodb.ScanInput{
-		TableName:                 aws.String("the-drink-almanac-favorites"),
+		TableName:                 aws.String(FAVORITES_TABLE_NAME),
 		FilterExpression:          filterExpression.Filter(),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
@@ -62,7 +66,15 @@ func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorit
 }
 
 func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
-	return fmt.Errorf("not implemented yet")
+	_, err := frd.dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(FAVORITES_TABLE_NAME),
+		Item: map[string]types.AttributeValue{
+			"id":       &types.AttributeValueMemberS{Value: favorite.Id},
+			"drink_id": &types.AttributeValueMemberS{Value: favorite.DrinkId},
+			"user_id":  &types.AttributeValueMemberS{Value: favorite.UserId},
+		},
+	})
+	return err
 }
 
 func NewFavoriteStoreDDB() (*FavoriteStoreDDB, error) {

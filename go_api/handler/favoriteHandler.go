@@ -49,9 +49,11 @@ func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
 		return
 	}
 
-	_, err := fh.Service.CreateNewFavorite(newFavoritePostRequest.UserId, newFavoritePostRequest.DrinkId)
+	newFavorite, err := fh.Service.CreateNewFavorite(newFavoritePostRequest.UserId, newFavoritePostRequest.DrinkId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("unable to add the new favorite: %s", err.Error())})
 		return
 	}
+
+	c.JSON(http.StatusCreated, newFavorite)
 }

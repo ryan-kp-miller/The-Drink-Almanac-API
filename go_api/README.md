@@ -41,16 +41,18 @@ To stop the api, run the `make down` command.
 
 ## To Do
 
-- Troubleshoot why drinkId and userId are no longer coming through since they were changed to strings
+- [x] Troubleshoot why drinkId and userId are no longer coming through since they were changed to strings
 - Create endpoints for:
-  - User authentication
-  - Create new users
-  - Create new favorites
-    - Add validation logic inside the favorite service to verify that a favorite doesn't exist for 
-- Set up Data Transfer Object types for request bodies and responses
-- Update existing endpoints to use user authorization (access tokens)
-- Write unit tests (80% or higher coverage)
-- Add better logging using Gin's built-in logger
-- Deploy API
-- Set up CI/CD for automatically deploying changes
-- Add code coverage badge to repo's README
+  - [ ] User authentication
+  - [ ] Create new users
+  - [x] Create new favorites
+    - [x] Add validation logic inside the favorite service to verify that a favorite doesn't exist before creating a new one
+  - [ ] Delete a favorite using the favorite's id
+- [ ] Set up Data Transfer Object types for request bodies and responses
+- [ ] Update existing endpoints to use user authorization (access tokens)
+- [ ] Move hardcoded table names and other env variables to an app config struct
+- [ ] Write unit tests (80% or higher coverage)
+- [ ] Add better logging using Gin's built-in logger
+- [ ] Deploy API
+- [ ] Set up CI/CD for automatically deploying changes
+- [ ] Add code coverage badge to repo's README
