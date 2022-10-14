@@ -46,10 +46,12 @@ To stop the api, run the `make down` command.
 
 - [x] Troubleshoot why drinkId and userId are no longer coming through since they were changed to strings
 - Create endpoints for:
-  - [ ] Create new users
+  - [x] Create new users
   - [x] Create new favorites
     - [x] Add validation logic inside the favorite service to verify that a favorite doesn't exist before creating a new one
   - [x] Delete a favorite using the favorite's id
+  - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
+  - [ ] Add method to delete user and also delete any favorites associated with that user
   - [ ] User authentication
 - [ ] Set up Data Transfer Object types for request bodies and responses
 - [ ] Update existing endpoints to use user authorization (access tokens)

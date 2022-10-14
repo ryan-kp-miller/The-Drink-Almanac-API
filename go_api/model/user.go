@@ -8,4 +8,6 @@ type User struct {
 
 type UserStore interface {
 	FindAll() ([]User, error)
+	FindUserByUsername(username string) (*User, error)
+	CreateNewUser(User) error
 }

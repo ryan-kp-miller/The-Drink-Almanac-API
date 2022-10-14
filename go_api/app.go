@@ -35,6 +35,7 @@ func Start(port string) {
 	us := service.NewDefaultUserService(ur)
 	uh := handler.UserHandlers{Service: us}
 	router.GET("/users", uh.FindAllUsers)
+	router.POST("/user", uh.CreateNewUser)
 
 	// running the app
 	router.Run(fmt.Sprintf(":%s", port))

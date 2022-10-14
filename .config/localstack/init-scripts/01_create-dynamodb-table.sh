@@ -5,8 +5,14 @@ awslocal dynamodb --endpoint-url=http://localhost:4566 create-table \
     --table-name the-drink-almanac-users\
     --attribute-definitions \
         AttributeName=id,AttributeType=S \
+        AttributeName=username,AttributeType=S \
     --key-schema \
         AttributeName=id,KeyType=HASH \
+    --global-secondary-indexes \
+    "[{\"IndexName\": \"username-index\",\"KeySchema\":[{\"AttributeName\":\"username\",\"KeyType\":\"HASH\"}],\"Projection\": {\"ProjectionType\": \"ALL\"},\"ProvisionedThroughput\": {
+                    \"WriteCapacityUnits\": 5,
+                    \"ReadCapacityUnits\": 10
+                }}]" \
 --provisioned-throughput \
         ReadCapacityUnits=10,WriteCapacityUnits=5
 
