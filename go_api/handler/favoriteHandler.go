@@ -28,25 +28,26 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-
 	if len(favorites) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("no favorites were found for user with id %s", userId)})
 		return
 	}
-
 	c.JSON(http.StatusOK, favorites)
 }
 
 func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
 	var newFavoritePostRequest dto.FavoritePostRequest
 	if err := c.BindJSON(&newFavoritePostRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "the request body must contain drink_id and user_id string fields"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "please provide the drink_id and user_id in the body of your request"})
 		return
 	}
-
+	if err := newFavoritePostRequest.ValidateRequest(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 	newFavorite, err := fh.Service.CreateNewFavorite(newFavoritePostRequest.UserId, newFavoritePostRequest.DrinkId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("unable to add the new favorite: %s", err.Error())})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("unable to add the new favorite due to %s", err.Error())})
 		return
 	}
 
@@ -59,7 +60,6 @@ func (fh *FavoriteHandlers) DeleteFavorite(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "you must specify an id"})
 		return
 	}
-
 	err := fh.Service.DeleteFavorite(favoriteId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})

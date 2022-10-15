@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -126,9 +127,7 @@ func TestFindFavoritesByUser(t *testing.T) {
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
-			if d.testName != "No user id provided" {
-				mockFavoriteService.On("FindFavoritesByUser", d.userId).Return(d.returnedFavorites, d.returnedError)
-			}
+			mockFavoriteService.On("FindFavoritesByUser", d.userId).Return(d.returnedFavorites, d.returnedError)
 			favoriteHandler := handler.FavoriteHandlers{mockFavoriteService}
 
 			rr := httptest.NewRecorder()
@@ -144,6 +143,97 @@ func TestFindFavoritesByUser(t *testing.T) {
 
 			if d.returnedFavorites != nil && len(d.returnedFavorites) != 0 {
 				expectedResponseBody, err := json.Marshal(d.returnedFavorites)
+				assert.NoError(t, err)
+				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
+			}
+		})
+	}
+}
+
+func TestCreateNewFavorite(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	mockFavorite := &model.Favorite{
+		Id:      "0",
+		DrinkId: "0",
+		UserId:  "0",
+	}
+	data := []struct {
+		testName           string
+		userId             string
+		drinkId            string
+		requestBody        []byte
+		returnedFavorite   *model.Favorite
+		returnedError      error
+		expectedStatusCode int
+	}{
+		{
+			testName:           "Successfully create favorite",
+			userId:             "0",
+			drinkId:            "0",
+			requestBody:        []byte(`{"user_id": "0", "drink_id": "0"}`),
+			returnedFavorite:   mockFavorite,
+			returnedError:      nil,
+			expectedStatusCode: http.StatusCreated,
+		},
+		{
+			testName:           "Failed to create favorite",
+			userId:             "0",
+			drinkId:            "0",
+			requestBody:        []byte(`{"user_id": "0", "drink_id": "0"}`),
+			returnedFavorite:   nil,
+			returnedError:      fmt.Errorf("failed to create favorite"),
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			testName:           "No request body",
+			userId:             "",
+			drinkId:            "",
+			requestBody:        nil,
+			returnedFavorite:   nil,
+			returnedError:      fmt.Errorf("failed to create favorite"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			testName:           "User id not provided",
+			userId:             "",
+			drinkId:            "0",
+			requestBody:        []byte(`{"drink_id": "0"}`),
+			returnedFavorite:   nil,
+			returnedError:      fmt.Errorf("user id not provided"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			testName:           "Drink id not provided",
+			userId:             "0",
+			drinkId:            "",
+			requestBody:        []byte(`{"user_id": "0"}`),
+			returnedFavorite:   nil,
+			returnedError:      fmt.Errorf("drink id not provided"),
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, d := range data {
+		t.Run(d.testName, func(t *testing.T) {
+			mockFavoriteService := mocks.NewFavoriteService(t)
+			if d.userId != "" && d.drinkId != "" {
+				mockFavoriteService.On("CreateNewFavorite", d.userId, d.drinkId).Return(d.returnedFavorite, d.returnedError)
+			}
+			favoriteHandler := handler.FavoriteHandlers{mockFavoriteService}
+
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodPost, "/favorite", bytes.NewBuffer(d.requestBody))
+			assert.NoError(t, err)
+
+			router := gin.Default()
+			router.POST("/favorite", favoriteHandler.CreateNewFavorite)
+			router.ServeHTTP(rr, request)
+
+			assert.Equal(t, d.expectedStatusCode, rr.Code)
+			mockFavoriteService.AssertExpectations(t)
+
+			if d.returnedFavorite != nil {
+				expectedResponseBody, err := json.Marshal(d.returnedFavorite)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
 			}
