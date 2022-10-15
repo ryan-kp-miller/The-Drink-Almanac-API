@@ -58,7 +58,7 @@ func TestFindAllFavorites(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("FindAllFavorites").Return(d.returnedFavorites, d.returnedError)
-			favoriteHandler := handler.FavoriteHandlers{mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/favorite", nil)
@@ -128,7 +128,7 @@ func TestFindFavoritesByUser(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("FindFavoritesByUser", d.userId).Return(d.returnedFavorites, d.returnedError)
-			favoriteHandler := handler.FavoriteHandlers{mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/favorite/%s", d.userId), nil)
@@ -219,7 +219,7 @@ func TestCreateNewFavorite(t *testing.T) {
 			if d.userId != "" && d.drinkId != "" {
 				mockFavoriteService.On("CreateNewFavorite", d.userId, d.drinkId).Return(d.returnedFavorite, d.returnedError)
 			}
-			favoriteHandler := handler.FavoriteHandlers{mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodPost, "/favorite", bytes.NewBuffer(d.requestBody))
@@ -237,6 +237,54 @@ func TestCreateNewFavorite(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
 			}
+		})
+	}
+}
+
+func TestDeleteFavorite(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	data := []struct {
+		testName           string
+		favoriteId         string
+		returnedError      error
+		expectedStatusCode int
+	}{
+		{
+			testName:           "Successfully delete favorite",
+			favoriteId:         "0",
+			returnedError:      nil,
+			expectedStatusCode: http.StatusNoContent,
+		},
+		{
+			testName:           "Failed to create favorite",
+			favoriteId:         "0",
+			returnedError:      fmt.Errorf("failed to create favorite"),
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			testName:           "No favorite exists",
+			favoriteId:         "0",
+			returnedError:      nil,
+			expectedStatusCode: http.StatusNoContent,
+		},
+	}
+
+	for _, d := range data {
+		t.Run(d.testName, func(t *testing.T) {
+			mockFavoriteService := mocks.NewFavoriteService(t)
+			mockFavoriteService.On("DeleteFavorite", d.favoriteId).Return(d.returnedError)
+			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
+
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/favorite/%s", d.favoriteId), nil)
+			assert.NoError(t, err)
+
+			router := gin.Default()
+			router.DELETE("/favorite/:favoriteId", favoriteHandler.DeleteFavorite)
+			router.ServeHTTP(rr, request)
+
+			assert.Equal(t, d.expectedStatusCode, rr.Code)
+			mockFavoriteService.AssertExpectations(t)
 		})
 	}
 }
