@@ -23,11 +23,6 @@ func (fh *FavoriteHandlers) FindAllFavorites(c *gin.Context) {
 
 func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 	userId := c.Param("userId")
-	if userId == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "you must specify a user id"})
-		return
-	}
-
 	favorites, err := fh.Service.FindFavoritesByUser(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
