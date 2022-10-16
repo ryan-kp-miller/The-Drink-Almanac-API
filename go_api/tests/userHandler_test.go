@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/handler"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
@@ -118,6 +119,16 @@ func TestCreateNewUser(t *testing.T) {
 			shouldMethodBeCalled: true,
 		},
 		{
+			testName:             "User already exists",
+			username:             "0",
+			password:             "0",
+			requestBody:          []byte(`{"username": "0", "password": "0"}`),
+			returnedUser:         mockUser,
+			returnedError:        appErrors.NewUserAlreadyExistsError("user exists"),
+			expectedStatusCode:   http.StatusConflict,
+			shouldMethodBeCalled: true,
+		},
+		{
 			testName:             "No request body",
 			username:             "",
 			password:             "",
@@ -188,7 +199,7 @@ func TestCreateNewUser(t *testing.T) {
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockUserService.AssertExpectations(t)
 
-			if d.returnedUser != nil {
+			if d.returnedError == nil {
 				expectedResponseBody, err := json.Marshal(d.returnedUser)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
