@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/dto"
 	"the-drink-almanac-api/service"
 
@@ -29,26 +32,28 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 	var userRequest dto.UserPostRequest
 	err := c.BindJSON(&userRequest)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "the request body must contain username and password fields",
-		})
+		err_msg := err.Error()
+
+		if strings.Contains(err_msg, "cannot unmarshal number into Go struct field UserPostRequest.username of type string") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "the username must be a string"})
+			return
+		}
+		if strings.Contains(err_msg, "cannot unmarshal number into Go struct field UserPostRequest.password of type string") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "the password must be a string"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"message": "please provide the username and password in the body of your request"})
 		return
 	}
-	if userRequest.Username == "" {
+	if err = userRequest.ValidateRequest(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "the username field must not be blank",
-		})
-		return
-	}
-	if userRequest.Password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "the password field must not be blank",
+			"message": err.Error(),
 		})
 		return
 	}
 	user, err := uh.Service.CreateNewUser(userRequest.Username, userRequest.Password)
 	if err != nil {
-		if user != nil {
+		if errors.As(err, &appErrors.UserAlreadyExistsError{}) {
 			c.JSON(http.StatusConflict, gin.H{
 				"message": fmt.Sprintf("a user already exists with the username %s", user.Username),
 			})

@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/model"
 
 	"github.com/google/uuid"
@@ -28,7 +29,7 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 		return nil, err
 	}
 	if user != nil {
-		return user, fmt.Errorf("a user already exists with the username %s", username)
+		return user, appErrors.NewUserAlreadyExistsError(fmt.Sprintf("a user already exists with the username %s", username))
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
