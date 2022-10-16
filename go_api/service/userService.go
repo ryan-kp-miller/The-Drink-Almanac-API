@@ -30,6 +30,13 @@ func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
 // CreateNewUser either creates a new user if one doesn't exist with the given username and password
 // or returns the existing user and the UserAlreadyExistsError
 func (s DefaultUserService) CreateNewUser(username, password string) (*model.User, error) {
+	if username == "" {
+		return nil, fmt.Errorf("the username must not be empty")
+	}
+	if password == "" {
+		return nil, fmt.Errorf("the password must not be empty")
+	}
+
 	// ensure that we aren't creating a duplicate user by check for an existing record with the same username
 	user, err := s.store.FindUserByUsername(username)
 	if err != nil {
