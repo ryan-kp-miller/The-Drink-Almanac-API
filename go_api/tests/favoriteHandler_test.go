@@ -158,65 +158,91 @@ func TestCreateNewFavorite(t *testing.T) {
 		UserId:  "0",
 	}
 	data := []struct {
-		testName           string
-		userId             string
-		drinkId            string
-		requestBody        []byte
-		returnedFavorite   *model.Favorite
-		returnedError      error
-		expectedStatusCode int
+		testName             string
+		userId               string
+		drinkId              string
+		requestBody          []byte
+		returnedFavorite     *model.Favorite
+		returnedError        error
+		expectedStatusCode   int
+		shouldMethodBeCalled bool
 	}{
 		{
-			testName:           "Successfully create favorite",
-			userId:             "0",
-			drinkId:            "0",
-			requestBody:        []byte(`{"user_id": "0", "drink_id": "0"}`),
-			returnedFavorite:   mockFavorite,
-			returnedError:      nil,
-			expectedStatusCode: http.StatusCreated,
+			testName:             "Successfully create favorite",
+			userId:               "0",
+			drinkId:              "0",
+			requestBody:          []byte(`{"user_id": "0", "drink_id": "0"}`),
+			returnedFavorite:     mockFavorite,
+			returnedError:        nil,
+			expectedStatusCode:   http.StatusCreated,
+			shouldMethodBeCalled: true,
 		},
 		{
-			testName:           "Failed to create favorite",
-			userId:             "0",
-			drinkId:            "0",
-			requestBody:        []byte(`{"user_id": "0", "drink_id": "0"}`),
-			returnedFavorite:   nil,
-			returnedError:      fmt.Errorf("failed to create favorite"),
-			expectedStatusCode: http.StatusInternalServerError,
+			testName:             "Failed to create favorite",
+			userId:               "0",
+			drinkId:              "0",
+			requestBody:          []byte(`{"user_id": "0", "drink_id": "0"}`),
+			returnedFavorite:     nil,
+			returnedError:        fmt.Errorf("failed to create favorite"),
+			expectedStatusCode:   http.StatusInternalServerError,
+			shouldMethodBeCalled: true,
 		},
 		{
-			testName:           "No request body",
-			userId:             "",
-			drinkId:            "",
-			requestBody:        nil,
-			returnedFavorite:   nil,
-			returnedError:      fmt.Errorf("failed to create favorite"),
-			expectedStatusCode: http.StatusBadRequest,
+			testName:             "No request body",
+			userId:               "",
+			drinkId:              "",
+			requestBody:          nil,
+			returnedFavorite:     nil,
+			returnedError:        fmt.Errorf("failed to create favorite"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
 		},
 		{
-			testName:           "User id not provided",
-			userId:             "",
-			drinkId:            "0",
-			requestBody:        []byte(`{"drink_id": "0"}`),
-			returnedFavorite:   nil,
-			returnedError:      fmt.Errorf("user id not provided"),
-			expectedStatusCode: http.StatusBadRequest,
+			testName:             "User id not provided",
+			userId:               "",
+			drinkId:              "0",
+			requestBody:          []byte(`{"drink_id": "0"}`),
+			returnedFavorite:     nil,
+			returnedError:        fmt.Errorf("user id not provided"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
 		},
 		{
-			testName:           "Drink id not provided",
-			userId:             "0",
-			drinkId:            "",
-			requestBody:        []byte(`{"user_id": "0"}`),
-			returnedFavorite:   nil,
-			returnedError:      fmt.Errorf("drink id not provided"),
-			expectedStatusCode: http.StatusBadRequest,
+			testName:             "Drink id not provided",
+			userId:               "0",
+			drinkId:              "",
+			requestBody:          []byte(`{"user_id": "0"}`),
+			returnedFavorite:     nil,
+			returnedError:        fmt.Errorf("drink id not provided"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+		},
+		{
+			testName:             "Non-string user id provided",
+			userId:               "0",
+			drinkId:              "0",
+			requestBody:          []byte(`{"user_id": 0, "drink_id": "0"}`),
+			returnedFavorite:     nil,
+			returnedError:        fmt.Errorf("user id is not a string"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+		},
+		{
+			testName:             "Non-string drink id provided",
+			userId:               "0",
+			drinkId:              "0",
+			requestBody:          []byte(`{"user_id": "0", "drink_id": 0}`),
+			returnedFavorite:     nil,
+			returnedError:        fmt.Errorf("drink id is not a string"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
 		},
 	}
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
-			if d.userId != "" && d.drinkId != "" {
+			if d.shouldMethodBeCalled {
 				mockFavoriteService.On("CreateNewFavorite", d.userId, d.drinkId).Return(d.returnedFavorite, d.returnedError)
 			}
 			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}

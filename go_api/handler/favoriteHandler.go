@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"the-drink-almanac-api/dto"
 	"the-drink-almanac-api/service"
 
@@ -38,6 +39,16 @@ func (fh *FavoriteHandlers) FindFavoritesByUser(c *gin.Context) {
 func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
 	var newFavoritePostRequest dto.FavoritePostRequest
 	if err := c.BindJSON(&newFavoritePostRequest); err != nil {
+		err_msg := err.Error()
+
+		if strings.Contains(err_msg, "cannot unmarshal number into Go struct field FavoritePostRequest.drink_id of type string") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "the drink_id must be a string"})
+			return
+		}
+		if strings.Contains(err_msg, "cannot unmarshal number into Go struct field FavoritePostRequest.user_id of type string") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "the user_id must be a string"})
+			return
+		}
 		c.JSON(http.StatusBadRequest, gin.H{"message": "please provide the drink_id and user_id in the body of your request"})
 		return
 	}
