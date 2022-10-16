@@ -50,6 +50,7 @@ To stop the api, run the `make down` command.
   - [x] Create new favorites
     - [x] Add validation logic inside the favorite service to verify that a favorite doesn't exist before creating a new one
   - [x] Delete a favorite using the favorite's id
+  - [x] Fix create favorite post method to actually check if drink or user ids are empty
   - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
   - [ ] Add method to delete user and also delete any favorites associated with that user
   - [ ] User authentication
@@ -57,7 +58,19 @@ To stop the api, run the `make down` command.
 - [ ] Update existing endpoints to use user authorization (access tokens)
 - [ ] Move hardcoded table names and other env variables to an app config struct
 - [ ] Write unit tests (80% or higher coverage)
-- [ ] Add better logging using Gin's built-in logger
+  - [ ] Favorites
+    - [ ] dto
+    - [x] handler
+    - [ ] service
+    - [ ] store
+  - [ ] Users
+    - [ ] dto
+    - [ ] handler
+    - [ ] service
+    - [ ] store
+- [ ] Add better logging
+- [ ] Swagger docs
 - [ ] Deploy API
+  - Terraform?
 - [ ] Set up CI/CD for automatically deploying changes
 - [ ] Add code coverage badge to repo's README
