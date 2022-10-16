@@ -62,12 +62,12 @@ To stop the api, run the `make down` command.
 - [ ] Move hardcoded table names and other env variables to an app config struct
 - [ ] Write unit tests (80% or higher coverage)
   - [ ] Favorites
-    - [ ] dto
+    - [x] dto
     - [x] handler
     - [ ] service
     - [ ] store
   - [ ] Users
-    - [ ] dto
+    - [x] dto
     - [x] handler
     - [ ] service
     - [ ] store
