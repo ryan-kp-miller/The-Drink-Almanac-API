@@ -36,6 +36,20 @@ func (_m *UserService) CreateNewUser(username string, password string) (*model.U
 	return r0, r1
 }
 
+// DeleteUser provides a mock function with given fields: id
+func (_m *UserService) DeleteUser(id string) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // FindAllUsers provides a mock function with given fields:
 func (_m *UserService) FindAllUsers() ([]model.User, error) {
 	ret := _m.Called()

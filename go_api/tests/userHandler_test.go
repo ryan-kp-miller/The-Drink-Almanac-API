@@ -197,50 +197,50 @@ func TestCreateNewUser(t *testing.T) {
 	}
 }
 
-// func TestDeleteUser(t *testing.T) {
-// 	gin.SetMode(gin.TestMode)
-// 	data := []struct {
-// 		testName           string
-// 		username             string
-// 		returnedError      error
-// 		expectedStatusCode int
-// 	}{
-// 		{
-// 			testName:           "Successfully delete user",
-// 			username:             "0",
-// 			returnedError:      nil,
-// 			expectedStatusCode: http.StatusNoContent,
-// 		},
-// 		{
-// 			testName:           "Failed to create user",
-// 			username:             "0",
-// 			returnedError:      fmt.Errorf("failed to create user"),
-// 			expectedStatusCode: http.StatusInternalServerError,
-// 		},
-// 		{
-// 			testName:           "No user exists",
-// 			username:             "0",
-// 			returnedError:      nil,
-// 			expectedStatusCode: http.StatusNoContent,
-// 		},
-// 	}
+func TestDeleteUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	data := []struct {
+		testName           string
+		userId             string
+		returnedError      error
+		expectedStatusCode int
+	}{
+		{
+			testName:           "Successfully delete user",
+			userId:             "0",
+			returnedError:      nil,
+			expectedStatusCode: http.StatusNoContent,
+		},
+		{
+			testName:           "Failed to create user",
+			userId:             "0",
+			returnedError:      fmt.Errorf("failed to delete user"),
+			expectedStatusCode: http.StatusInternalServerError,
+		},
+		{
+			testName:           "No user exists",
+			userId:             "0",
+			returnedError:      nil,
+			expectedStatusCode: http.StatusNoContent,
+		},
+	}
 
-// 	for _, d := range data {
-// 		t.Run(d.testName, func(t *testing.T) {
-// 			mockUserService := mocks.NewUserService(t)
-// 			mockUserService.On("DeleteUser", d.username).Return(d.returnedError)
-// 			userHandler := handler.UserHandlers{Service: mockUserService}
+	for _, d := range data {
+		t.Run(d.testName, func(t *testing.T) {
+			mockUserService := mocks.NewUserService(t)
+			mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
+			userHandler := handler.UserHandlers{Service: mockUserService}
 
-// 			rr := httptest.NewRecorder()
-// 			request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/user/%s", d.username), nil)
-// 			assert.NoError(t, err)
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/user/%s", d.userId), nil)
+			assert.NoError(t, err)
 
-// 			router := gin.Default()
-// 			router.DELETE("/user/:username", userHandler.DeleteUser)
-// 			router.ServeHTTP(rr, request)
+			router := gin.Default()
+			router.DELETE("/user/:userId", userHandler.DeleteUser)
+			router.ServeHTTP(rr, request)
 
-// 			assert.Equal(t, d.expectedStatusCode, rr.Code)
-// 			mockUserService.AssertExpectations(t)
-// 		})
-// 	}
-// }
+			assert.Equal(t, d.expectedStatusCode, rr.Code)
+			mockUserService.AssertExpectations(t)
+		})
+	}
+}
