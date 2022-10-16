@@ -1,5 +1,7 @@
 # The Drink Almanac API (Golang version) <!-- omit in toc -->
 
+[![codecov](https://codecov.io/gh/ryan-kp-miller/The-Drink-Almanac-API/branch/feature%sFgo-api/graph/badge.svg?token=D5YMAWKNM4)](https://codecov.io/gh/ryan-kp-miller/The-Drink-Almanac-API)
+
 The original API was built using Python and Heroku. This version will use Golang and AWS. The functionality should not change (for now).
 
 
