@@ -71,6 +71,7 @@ To stop the api, run the `make down` command.
     - [x] handler
     - [ ] service
     - [ ] store
+  - [x] Add tests to CICD pipeline
 - [ ] Add better logging
 - [ ] Swagger docs
 - [ ] Deploy API
