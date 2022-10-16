@@ -10,4 +10,5 @@ type UserStore interface {
 	FindAll() ([]User, error)
 	FindUserByUsername(username string) (*User, error)
 	CreateNewUser(User) error
+	DeleteUser(id string) error
 }

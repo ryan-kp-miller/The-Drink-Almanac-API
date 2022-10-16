@@ -52,7 +52,8 @@ To stop the api, run the `make down` command.
   - [x] Delete a favorite using the favorite's id
   - [x] Fix create favorite post method to actually check if drink or user ids are empty
   - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
-  - [ ] Add method to delete user and also delete any favorites associated with that user
+  - [ ] Add method to delete user and also 
+  - [ ] Update delete user method to also delete any favorites associated with that user
   - [ ] User authentication
 - [ ] Set up Data Transfer Object types for request bodies and responses
 - [ ] Update existing endpoints to use user authorization (access tokens)

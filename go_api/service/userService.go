@@ -12,16 +12,23 @@ import (
 type UserService interface {
 	FindAllUsers() ([]model.User, error)
 	CreateNewUser(username, password string) (*model.User, error)
+	DeleteUser(id string) error
 }
 
 type DefaultUserService struct {
 	store model.UserStore
 }
 
+// FindAllUsers returns all users in the user store
+//
+// This method will be restricted to admin users only
+// when auth is set up
 func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
 	return s.store.FindAll()
 }
 
+// CreateNewUser either creates a new user if one doesn't exist with the given username and password
+// or returns the existing user and the UserAlreadyExistsError
 func (s DefaultUserService) CreateNewUser(username, password string) (*model.User, error) {
 	// ensure that we aren't creating a duplicate user by check for an existing record with the same username
 	user, err := s.store.FindUserByUsername(username)
@@ -47,6 +54,12 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 		return nil, err
 	}
 	return user, nil
+}
+
+// DeleteUser removes the user's record from the user store
+// based on the provided id
+func (s DefaultUserService) DeleteUser(id string) error {
+	return s.store.DeleteUser(id)
 }
 
 func NewDefaultUserService(store model.UserStore) DefaultUserService {

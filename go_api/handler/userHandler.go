@@ -66,3 +66,14 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, user)
 }
+
+func (uh *UserHandlers) DeleteUser(c *gin.Context) {
+	userId := c.Param("userId")
+	err := uh.Service.DeleteUser(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"message": "the user was deleted"})
+}

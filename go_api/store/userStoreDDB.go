@@ -95,6 +95,18 @@ func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
 	return err
 }
 
+// DeleteUser removes the record associated with the given id
+// from the store's user table
+func (usd *UserStoreDDB) DeleteUser(id string) error {
+	_, err := usd.dynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+		TableName: aws.String(USERS_TABLE_NAME),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: id},
+		},
+	})
+	return err
+}
+
 func NewUserStoreDDB() (*UserStoreDDB, error) {
 	ddbClient, err := CreateLocalClient()
 	return &UserStoreDDB{

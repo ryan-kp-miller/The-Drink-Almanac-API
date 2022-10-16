@@ -34,8 +34,10 @@ func Start(port string) {
 	ur, _ := store.NewUserStoreDDB()
 	us := service.NewDefaultUserService(ur)
 	uh := handler.UserHandlers{Service: us}
-	router.GET("/users", uh.FindAllUsers)
-	router.POST("/user", uh.CreateNewUser)
+	userRouteGroup := router.Group("/user")
+	userRouteGroup.GET("", uh.FindAllUsers)
+	userRouteGroup.POST("/:userId", uh.CreateNewUser)
+	userRouteGroup.DELETE("/:userId", uh.DeleteUser)
 
 	// running the app
 	router.Run(fmt.Sprintf(":%s", port))
