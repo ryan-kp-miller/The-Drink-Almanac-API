@@ -1,6 +1,8 @@
 .DEFAULT_GOAL := start
 image_name = the-drink-almanac-api-image
 container_name = the-drink-almanac-api-container
+test_image_name = the-drink-almanac-api-test-image
+test_container_name = the-drink-almanac-api-test-container
 
 build:
 	docker build -t $(image_name) ./go_api
@@ -23,3 +25,8 @@ up:
 down:
 	docker compose down
 .PHONY:down
+
+test:
+	docker build -t $(test_image_name) -f ./go_api/Dockerfile.test ./go_api
+	docker run -it --rm --name $(test_container_name) $(test_image_name)
+.PHONY:test
