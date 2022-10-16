@@ -1,0 +1,36 @@
+name: Test Go API
+
+on:
+  push:
+    branches: [feature/*]
+
+jobs:
+  test-lambdas:
+    name: Test Go API
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.1
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch required Go modules
+        run:  go mod download
+
+      - name: Run api unit tests
+        run:  go test -coverprofile=./go_api/coverage.txt -covermode=atomic -v ./go_api/...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/reports/
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./go_api/coverage.txt
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
