@@ -282,9 +282,9 @@ func TestDeleteFavorite(t *testing.T) {
 			expectedStatusCode: http.StatusNoContent,
 		},
 		{
-			testName:           "Failed to create favorite",
+			testName:           "Failed to delete favorite",
 			favoriteId:         "0",
-			returnedError:      fmt.Errorf("failed to create favorite"),
+			returnedError:      fmt.Errorf("failed to delete favorite"),
 			expectedStatusCode: http.StatusInternalServerError,
 		},
 		{
