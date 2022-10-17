@@ -16,7 +16,7 @@ var (
 )
 
 type FavoriteStoreDDB struct {
-	dynamodbClient DDBClient
+	DynamodbClient DDBClient
 }
 
 func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
@@ -24,7 +24,7 @@ func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
 		TableName: aws.String("the-drink-almanac-favorites"),
 	}
 	ctx := context.TODO()
-	scanOutput, err := frd.dynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := frd.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorit
 		ExpressionAttributeValues: filterExpression.Values(),
 	}
 	ctx := context.TODO()
-	scanOutput, err := frd.dynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := frd.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorit
 }
 
 func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
-	_, err := frd.dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err := frd.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String(FAVORITES_TABLE_NAME),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: favorite.Id},
@@ -78,7 +78,7 @@ func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
 }
 
 func (frd *FavoriteStoreDDB) DeleteFavorite(id string) error {
-	_, err := frd.dynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+	_, err := frd.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
 		TableName: aws.String(FAVORITES_TABLE_NAME),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: id},
@@ -90,6 +90,6 @@ func (frd *FavoriteStoreDDB) DeleteFavorite(id string) error {
 func NewFavoriteStoreDDB() (*FavoriteStoreDDB, error) {
 	ddbClient, err := CreateLocalClient()
 	return &FavoriteStoreDDB{
-		dynamodbClient: ddbClient,
+		DynamodbClient: ddbClient,
 	}, err
 }

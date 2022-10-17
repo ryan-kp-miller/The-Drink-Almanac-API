@@ -18,7 +18,7 @@ var (
 )
 
 type UserStoreDDB struct {
-	dynamodbClient DDBClient
+	DynamodbClient DDBClient
 }
 
 func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
@@ -26,7 +26,7 @@ func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
 		TableName: aws.String(USERS_TABLE_NAME),
 	}
 	ctx := context.TODO()
-	scanOutput, err := usd.dynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := usd.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 		ExpressionAttributeValues: filterExpression.Values(),
 	}
 	ctx := context.TODO()
-	scanOutput, err := usd.dynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := usd.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 //
 // Please ensure that you aren't inserting a duplicate record (i.e. user with that username already exists)
 func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
-	_, err := usd.dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err := usd.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String(USERS_TABLE_NAME),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: user.Id},
@@ -98,7 +98,7 @@ func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
 // DeleteUser removes the record associated with the given id
 // from the store's user table
 func (usd *UserStoreDDB) DeleteUser(id string) error {
-	_, err := usd.dynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+	_, err := usd.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
 		TableName: aws.String(USERS_TABLE_NAME),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: id},
@@ -110,6 +110,6 @@ func (usd *UserStoreDDB) DeleteUser(id string) error {
 func NewUserStoreDDB() (*UserStoreDDB, error) {
 	ddbClient, err := CreateLocalClient()
 	return &UserStoreDDB{
-		dynamodbClient: ddbClient,
+		DynamodbClient: ddbClient,
 	}, err
 }
