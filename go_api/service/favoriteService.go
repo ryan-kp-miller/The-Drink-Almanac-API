@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/model"
 
 	"github.com/google/uuid"
@@ -26,8 +27,8 @@ func (s DefaultFavoriteService) FindFavoritesByUser(userId string) ([]model.Favo
 	return s.store.FindFavoritesByUser(userId)
 }
 
-// CreateNewFavorite checks if a favorite already exists in the FavoriteStore
-// with the same user and drink ids
+// CreateNewFavorite either creates a new favorite if one doesn't exist with the given drinkId and userId
+// or returns the existing favorite and the FavoriteAlreadyExistsError
 func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*model.Favorite, error) {
 	if drinkId == "" {
 		return nil, fmt.Errorf("the drinkId must not be empty")
@@ -52,7 +53,7 @@ func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*mode
 		}
 	}
 	if doesFavoriteExist {
-		return existingFavorite, fmt.Errorf("the user already favorited this drink")
+		return existingFavorite, appErrors.NewFavoriteAlreadyExistsError("the user already favorited this drink")
 	}
 
 	favoriteUuid := uuid.New()

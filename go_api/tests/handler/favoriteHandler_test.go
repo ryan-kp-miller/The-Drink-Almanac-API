@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/handler"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
@@ -188,6 +189,16 @@ func TestCreateNewFavorite(t *testing.T) {
 			shouldMethodBeCalled: true,
 		},
 		{
+			testName:             "Favorite already exists",
+			userId:               "0",
+			drinkId:              "0",
+			requestBody:          []byte(`{"user_id": "0", "drink_id": "0"}`),
+			returnedFavorite:     mockFavorite,
+			returnedError:        appErrors.NewFavoriteAlreadyExistsError("favorite already exists"),
+			expectedStatusCode:   http.StatusConflict,
+			shouldMethodBeCalled: true,
+		},
+		{
 			testName:             "No request body",
 			userId:               "",
 			drinkId:              "",
@@ -258,7 +269,7 @@ func TestCreateNewFavorite(t *testing.T) {
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockFavoriteService.AssertExpectations(t)
 
-			if d.returnedFavorite != nil {
+			if d.returnedFavorite != nil && d.returnedError == nil {
 				expectedResponseBody, err := json.Marshal(d.returnedFavorite)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())

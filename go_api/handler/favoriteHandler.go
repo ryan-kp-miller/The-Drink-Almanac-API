@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/dto"
 	"the-drink-almanac-api/service"
 
@@ -58,6 +60,12 @@ func (fh *FavoriteHandlers) CreateNewFavorite(c *gin.Context) {
 	}
 	newFavorite, err := fh.Service.CreateNewFavorite(newFavoritePostRequest.UserId, newFavoritePostRequest.DrinkId)
 	if err != nil {
+		if errors.As(err, &appErrors.FavoriteAlreadyExistsError{}) {
+			c.JSON(http.StatusConflict, gin.H{
+				"message": fmt.Sprintf("the user %s already favorited the drink with id %s", newFavorite.UserId, newFavorite.DrinkId),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("unable to add the new favorite due to %s", err.Error())})
 		return
 	}
