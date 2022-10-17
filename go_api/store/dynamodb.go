@@ -8,7 +8,13 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-//CreateLocalClient creates a dynamodb client using environment variables
+type DDBClient interface {
+	Scan(context.Context, *dynamodb.ScanInput, ...func(*dynamodb.Options)) (*dynamodb.ScanOutput, error)
+	PutItem(context.Context, *dynamodb.PutItemInput, ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error)
+	DeleteItem(context.Context, *dynamodb.DeleteItemInput, ...func(*dynamodb.Options)) (*dynamodb.DeleteItemOutput, error)
+}
+
+// CreateLocalClient creates a dynamodb client using environment variables
 func CreateLocalClient() (*dynamodb.Client, error) {
 	awsEndpoint := DefaultEnv("AWS_ENDPOINT", "http://localstack:4566")
 	cfg, err := config.LoadDefaultConfig(context.TODO())

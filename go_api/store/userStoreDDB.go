@@ -18,7 +18,7 @@ var (
 )
 
 type UserStoreDDB struct {
-	dynamodbClient *dynamodb.Client
+	dynamodbClient DDBClient
 }
 
 func (usd *UserStoreDDB) FindAll() ([]model.User, error) {

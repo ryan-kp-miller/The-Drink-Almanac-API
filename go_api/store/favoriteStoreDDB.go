@@ -16,7 +16,7 @@ var (
 )
 
 type FavoriteStoreDDB struct {
-	dynamodbClient *dynamodb.Client
+	dynamodbClient DDBClient
 }
 
 func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
