@@ -33,11 +33,7 @@ func TestUserStoreDDB_FindAll(t *testing.T) {
 			Password: iStr,
 		}
 	}
-	scanOutput := &dynamodb.ScanOutput{
-		Count:        int32(numUsers),
-		Items:        userItems,
-		ScannedCount: int32(numUsers),
-	}
+	scanOutput := &dynamodb.ScanOutput{Items: userItems}
 	scanInput := &dynamodb.ScanInput{
 		TableName: aws.String("the-drink-almanac-users"),
 	}
@@ -102,14 +98,10 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 		expectError   bool
 	}{
 		{
-			name:         "Successfully retrieve users",
-			username:     "0",
-			expectedUser: &mockUsers[0],
-			scanOutput: &dynamodb.ScanOutput{
-				Count:        1,
-				Items:        userItems[:1],
-				ScannedCount: 1,
-			},
+			name:          "Successfully retrieve users",
+			username:      "0",
+			expectedUser:  &mockUsers[0],
+			scanOutput:    &dynamodb.ScanOutput{Items: userItems[:1]},
 			returnedError: nil,
 			expectError:   false,
 		},
@@ -121,26 +113,18 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 			expectError:   true,
 		},
 		{
-			name:         "No existing user",
-			username:     "0",
-			expectedUser: nil,
-			scanOutput: &dynamodb.ScanOutput{
-				Count:        0,
-				Items:        nil,
-				ScannedCount: 0,
-			},
+			name:          "No existing user",
+			username:      "0",
+			expectedUser:  nil,
+			scanOutput:    &dynamodb.ScanOutput{Items: nil},
 			returnedError: nil,
 			expectError:   false,
 		},
 		{
-			name:         "Too many users",
-			username:     "0",
-			expectedUser: nil,
-			scanOutput: &dynamodb.ScanOutput{
-				Count:        int32(numUsers),
-				Items:        userItems,
-				ScannedCount: int32(numUsers),
-			},
+			name:          "Too many users",
+			username:      "0",
+			expectedUser:  nil,
+			scanOutput:    &dynamodb.ScanOutput{Items: userItems},
 			returnedError: nil,
 			expectError:   true,
 		},
