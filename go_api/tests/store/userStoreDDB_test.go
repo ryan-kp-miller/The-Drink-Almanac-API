@@ -78,42 +78,40 @@ func TestUserStoreDDB_FindAll(t *testing.T) {
 }
 
 func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
-	numUsers := 5
-	userItems := make([]map[string]types.AttributeValue, numUsers)
-	mockUsers := make([]model.User, numUsers)
-	for i := 0; i < numUsers; i++ {
-		iStr := strconv.Itoa(i)
-		userItems[i] = map[string]types.AttributeValue{
-			"id":       &types.AttributeValueMemberS{Value: iStr},
-			"username": &types.AttributeValueMemberS{Value: "0"},
-			"password": &types.AttributeValueMemberS{Value: iStr},
-		}
-		mockUsers[i] = model.User{
-			Id:       iStr,
-			Username: "0",
-			Password: iStr,
-		}
+	userItems := make([]map[string]types.AttributeValue, 1)
+	userItems[0] = map[string]types.AttributeValue{
+		"id":       &types.AttributeValueMemberS{Value: "0"},
+		"username": &types.AttributeValueMemberS{Value: "0"},
+		"password": &types.AttributeValueMemberS{Value: "0"},
+	}
+	mockUser := &model.User{
+		Id:       "0",
+		Username: "0",
+		Password: "0",
 	}
 	scanOutput := &dynamodb.ScanOutput{
-		Count:        int32(numUsers),
+		Count:        1,
 		Items:        userItems,
-		ScannedCount: int32(numUsers),
+		ScannedCount: 1,
 	}
 	tests := []struct {
 		name          string
-		expectedUsers []model.User
+		username      string
+		expectedUser  *model.User
 		returnedError error
 		expectError   bool
 	}{
 		{
 			name:          "Successfully retrieve users",
-			expectedUsers: mockUsers,
+			username:      "0",
+			expectedUser:  mockUser,
 			returnedError: nil,
 			expectError:   false,
 		},
 		{
 			name:          "Failed to retrieve users",
-			expectedUsers: nil,
+			username:      "0",
+			expectedUser:  nil,
 			returnedError: fmt.Errorf("failed to retrieve users"),
 			expectError:   true,
 		},
@@ -123,13 +121,13 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
 			mockDdbClient.On("Scan", context.TODO(), mock.AnythingOfType("*dynamodb.ScanInput")).Return(scanOutput, tt.returnedError)
 			userStore := store.UserStoreDDB{DynamodbClient: mockDdbClient}
-			got, err := userStore.FindAll()
+			got, err := userStore.FindUserByUsername(tt.username)
 			if (err != nil) != tt.expectError {
-				t.Errorf("UserStoreDDB.FindAll() error = %v", err)
+				t.Errorf("UserStoreDDB.FindUserByUsername() error = %v", err)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.expectedUsers) {
-				t.Errorf("UserStoreDDB.FindAll() = %v, want %v", got, tt.expectedUsers)
+			if !reflect.DeepEqual(got, tt.expectedUser) {
+				t.Errorf("UserStoreDDB.FindUserByUsername() = %v, want %v", got, tt.expectedUser)
 			}
 		})
 	}
@@ -176,7 +174,7 @@ func TestUserStoreDDB_CreateNewUser(t *testing.T) {
 			userStore := store.UserStoreDDB{DynamodbClient: mockDdbClient}
 			err := userStore.CreateNewUser(tt.expectedUser)
 			if (err != nil) != tt.expectError {
-				t.Errorf("UserStoreDDB.FindAll() error = %v", err)
+				t.Errorf("UserStoreDDB.CreateNewUser() error = %v", err)
 				return
 			}
 		})
@@ -222,7 +220,7 @@ func TestUserStoreDDB_DeleteUser(t *testing.T) {
 			userStore := store.UserStoreDDB{DynamodbClient: mockDdbClient}
 			err := userStore.DeleteUser(tt.expectedUser.Id)
 			if (err != nil) != tt.expectError {
-				t.Errorf("UserStoreDDB.FindAll() error = %v", err)
+				t.Errorf("UserStoreDDB.DeleteUser() error = %v", err)
 				return
 			}
 		})
