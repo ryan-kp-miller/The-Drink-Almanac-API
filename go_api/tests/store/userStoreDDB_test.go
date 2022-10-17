@@ -78,33 +78,38 @@ func TestUserStoreDDB_FindAll(t *testing.T) {
 }
 
 func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
-	userItems := make([]map[string]types.AttributeValue, 1)
-	userItems[0] = map[string]types.AttributeValue{
-		"id":       &types.AttributeValueMemberS{Value: "0"},
-		"username": &types.AttributeValueMemberS{Value: "0"},
-		"password": &types.AttributeValueMemberS{Value: "0"},
-	}
-	mockUser := &model.User{
-		Id:       "0",
-		Username: "0",
-		Password: "0",
-	}
-	scanOutput := &dynamodb.ScanOutput{
-		Count:        1,
-		Items:        userItems,
-		ScannedCount: 1,
+	numUsers := 5
+	userItems := make([]map[string]types.AttributeValue, numUsers)
+	mockUsers := make([]model.User, numUsers)
+	for i := 0; i < numUsers; i++ {
+		userItems[i] = map[string]types.AttributeValue{
+			"id":       &types.AttributeValueMemberS{Value: "0"},
+			"username": &types.AttributeValueMemberS{Value: "0"},
+			"password": &types.AttributeValueMemberS{Value: "0"},
+		}
+		mockUsers[i] = model.User{
+			Id:       "0",
+			Username: "0",
+			Password: "0",
+		}
 	}
 	tests := []struct {
 		name          string
 		username      string
 		expectedUser  *model.User
+		scanOutput    *dynamodb.ScanOutput
 		returnedError error
 		expectError   bool
 	}{
 		{
-			name:          "Successfully retrieve users",
-			username:      "0",
-			expectedUser:  mockUser,
+			name:         "Successfully retrieve users",
+			username:     "0",
+			expectedUser: &mockUsers[0],
+			scanOutput: &dynamodb.ScanOutput{
+				Count:        1,
+				Items:        userItems[:1],
+				ScannedCount: 1,
+			},
 			returnedError: nil,
 			expectError:   false,
 		},
@@ -115,11 +120,35 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 			returnedError: fmt.Errorf("failed to retrieve users"),
 			expectError:   true,
 		},
+		{
+			name:         "No existing user",
+			username:     "0",
+			expectedUser: nil,
+			scanOutput: &dynamodb.ScanOutput{
+				Count:        0,
+				Items:        nil,
+				ScannedCount: 0,
+			},
+			returnedError: nil,
+			expectError:   false,
+		},
+		{
+			name:         "Too many users",
+			username:     "0",
+			expectedUser: nil,
+			scanOutput: &dynamodb.ScanOutput{
+				Count:        int32(numUsers),
+				Items:        userItems,
+				ScannedCount: int32(numUsers),
+			},
+			returnedError: nil,
+			expectError:   true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
-			mockDdbClient.On("Scan", context.TODO(), mock.AnythingOfType("*dynamodb.ScanInput")).Return(scanOutput, tt.returnedError)
+			mockDdbClient.On("Scan", context.TODO(), mock.AnythingOfType("*dynamodb.ScanInput")).Return(tt.scanOutput, tt.returnedError)
 			userStore := store.UserStoreDDB{DynamodbClient: mockDdbClient}
 			got, err := userStore.FindUserByUsername(tt.username)
 			if (err != nil) != tt.expectError {
