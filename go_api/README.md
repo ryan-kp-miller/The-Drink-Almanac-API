@@ -56,6 +56,8 @@ To stop the api, run the `make down` command.
   - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
   - [x] Add method to delete user 
   - [ ] Update delete user method to also delete any favorites associated with that user
+    - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
+    - [ ] Add favorite store field to UserService
   - [ ] User authentication
 - [ ] Set up Data Transfer Object types for request bodies and responses
 - [ ] Update existing endpoints to use user authorization (access tokens)
@@ -64,12 +66,12 @@ To stop the api, run the `make down` command.
   - [ ] Favorites
     - [x] dto
     - [x] handler
-    - [ ] service
+    - [x] service
     - [ ] store
   - [ ] Users
     - [x] dto
     - [x] handler
-    - [ ] service
+    - [x] service
     - [ ] store
   - [x] Add tests to CICD pipeline
 - [ ] Add better logging

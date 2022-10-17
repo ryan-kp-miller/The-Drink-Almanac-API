@@ -29,6 +29,13 @@ func (s DefaultFavoriteService) FindFavoritesByUser(userId string) ([]model.Favo
 // CreateNewFavorite checks if a favorite already exists in the FavoriteStore
 // with the same user and drink ids
 func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*model.Favorite, error) {
+	if drinkId == "" {
+		return nil, fmt.Errorf("the drinkId must not be empty")
+	}
+	if userId == "" {
+		return nil, fmt.Errorf("the userId must not be empty")
+	}
+
 	// check if a favorite already exists for this drink/user id pair
 	userFavorites, err := s.store.FindFavoritesByUser(userId)
 	if err != nil {
