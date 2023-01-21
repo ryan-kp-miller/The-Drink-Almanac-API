@@ -198,6 +198,8 @@ func TestCreateNewUser(t *testing.T) {
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockUserService.AssertExpectations(t)
+
+			assert.Equal(t, true, false)
 		})
 	}
 }
