@@ -56,9 +56,14 @@ To stop the api, run the `make down` command.
   - [ ] Update delete user method to also delete any favorites associated with that user
     - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
     - [ ] Add favorite store field to UserService
-  - [ ] User authentication
-- [ ] Update existing endpoints to use user authorization (access tokens)
+  - [ ] Update existing endpoints to use user authorization (access tokens)
+    - [ ] GET /user
+    - [ ] DELETE /user
+    - [ ] GET /favorite (remove endpoint for retrieving all favorites for all users)
+    - [ ] POST /favorite
+    - [ ] DELETE /favorite
 - [ ] Move hardcoded table names and other env variables to an app config struct
+- [ ] More tests for new code
 - [ ] Add better logging
 - [ ] Swagger docs
 - [ ] Deploy API
@@ -77,6 +82,7 @@ To stop the api, run the `make down` command.
   - [x] Delete a favorite using the favorite's id
   - [x] Fix create favorite post method to actually check if drink or user ids are empty
   - [x] Add method to delete user 
+  - [x] User authentication
 - [x] Write unit tests (80% or higher coverage)
   - [x] Favorites
     - [x] dto
