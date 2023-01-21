@@ -69,6 +69,39 @@ func (s DefaultUserService) DeleteUser(id string) error {
 	return s.store.DeleteUser(id)
 }
 
+// Login checks if a user exists with the provided username and password new user if one doesn't exist with the given username and password
+// or returns the existing user and the UserAlreadyExistsError
+func (s DefaultUserService) Login(username, password string) (*model.User, error) {
+	if username == "" {
+		return nil, fmt.Errorf("the username must not be empty")
+	}
+	if password == "" {
+		return nil, fmt.Errorf("the password must not be empty")
+	}
+
+	// ensure that we aren't creating a duplicate user by check for an existing record with the same username
+	user, err := s.store.FindUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+	
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
+	if err != nil {
+		return nil, err
+	}
+
+	user = &model.User{
+		Id:       uuid.NewString(),
+		Username: username,
+		Password: string(hashedPassword),
+	}
+	err = s.store.CreateNewUser(*user)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func NewDefaultUserService(store model.UserStore) DefaultUserService {
 	return DefaultUserService{store: store}
 }
