@@ -36,8 +36,9 @@ func Start(port string) {
 	uh := handler.UserHandlers{Service: us}
 	userRouteGroup := router.Group("/user")
 	userRouteGroup.GET("", uh.FindAllUsers)
-	userRouteGroup.POST("/:userId", uh.CreateNewUser)
+	userRouteGroup.POST("/", uh.CreateNewUser)
 	userRouteGroup.DELETE("/:userId", uh.DeleteUser)
+	userRouteGroup.POST("/login", uh.Login)
 
 	// running the app
 	router.Run(fmt.Sprintf(":%s", port))

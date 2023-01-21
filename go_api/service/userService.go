@@ -13,10 +13,12 @@ type UserService interface {
 	FindAllUsers() ([]model.User, error)
 	CreateNewUser(username, password string) (*model.User, error)
 	DeleteUser(id string) error
+	Login(username, password string) (string, error)
 }
 
 type DefaultUserService struct {
-	store model.UserStore
+	store       model.UserStore
+	authService AuthService
 }
 
 // FindAllUsers returns all users in the user store
@@ -25,6 +27,14 @@ type DefaultUserService struct {
 // when auth is set up
 func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
 	return s.store.FindAll()
+}
+
+func (s DefaultUserService) getHashedPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }
 
 // CreateNewUser either creates a new user if one doesn't exist with the given username and password
@@ -43,10 +53,10 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 		return nil, err
 	}
 	if user != nil {
-		return user, appErrors.NewUserAlreadyExistsError(fmt.Sprintf("a user already exists with the username %s", username))
+		return user, appErrors.NewUserAlreadyExistsError(username)
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
+	hashedPassword, err := s.getHashedPassword(password)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +64,7 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 	user = &model.User{
 		Id:       uuid.NewString(),
 		Username: username,
-		Password: string(hashedPassword),
+		Password: hashedPassword,
 	}
 	err = s.store.CreateNewUser(*user)
 	if err != nil {
@@ -69,39 +79,40 @@ func (s DefaultUserService) DeleteUser(id string) error {
 	return s.store.DeleteUser(id)
 }
 
-// Login checks if a user exists with the provided username and password new user if one doesn't exist with the given username and password
-// or returns the existing user and the UserAlreadyExistsError
-func (s DefaultUserService) Login(username, password string) (*model.User, error) {
+// Login checks if a user exists with the provided username and password;
+// if a user exists:
+//   - and the password matches, returns a JWT string
+//   - and the password doesn't match, returns an error
+// if a user doesn't exist with the given username, returns the UserNotFoundError
+func (s DefaultUserService) Login(username, password string) (string, error) {
 	if username == "" {
-		return nil, fmt.Errorf("the username must not be empty")
+		return "", fmt.Errorf("the username must not be empty")
 	}
 	if password == "" {
-		return nil, fmt.Errorf("the password must not be empty")
+		return "", fmt.Errorf("the password must not be empty")
 	}
 
 	// ensure that we aren't creating a duplicate user by check for an existing record with the same username
 	user, err := s.store.FindUserByUsername(username)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
-	if err != nil {
-		return nil, err
+	if user == nil {
+		return "", appErrors.NewUserNotFoundError(username)
 	}
 
-	user = &model.User{
-		Id:       uuid.NewString(),
-		Username: username,
-		Password: string(hashedPassword),
-	}
-	err = s.store.CreateNewUser(*user)
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, err
+		return "", appErrors.NewIncorrectPasswordError(user.Username)
 	}
-	return user, nil
+
+	// set the ttl to 24 hours
+	return s.authService.CreateNewToken(user.Id, 60*24)
 }
 
 func NewDefaultUserService(store model.UserStore) DefaultUserService {
-	return DefaultUserService{store: store}
+	return DefaultUserService{
+		store:       store,
+		authService: NewJwtAuthService(),
+	}
 }

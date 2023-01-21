@@ -64,7 +64,7 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusCreated, user)
+	c.Status(http.StatusCreated)
 }
 
 func (uh *UserHandlers) DeleteUser(c *gin.Context) {
@@ -76,4 +76,47 @@ func (uh *UserHandlers) DeleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusNoContent, gin.H{"message": "the user was deleted"})
+}
+
+func (uh *UserHandlers) Login(c *gin.Context) {
+	var userRequest dto.UserPostRequest
+	err := c.BindJSON(&userRequest)
+	if err != nil {
+		err_msg := err.Error()
+
+		if strings.Contains(err_msg, "cannot unmarshal number into Go struct field UserPostRequest.username of type string") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "the username must be a string"})
+			return
+		}
+		if strings.Contains(err_msg, "cannot unmarshal number into Go struct field UserPostRequest.password of type string") {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "the password must be a string"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"message": "please provide the username and password in the body of your request"})
+		return
+	}
+	if err = userRequest.ValidateRequest(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	tokenString, err := uh.Service.Login(userRequest.Username, userRequest.Password)
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+		// I tried using a switch statement to clean this up,
+		// but it wasn't picking up my custom errors types
+		if errors.As(err, &appErrors.UserNotFoundError{}) {
+			statusCode = http.StatusNotFound
+		}
+		if errors.As(err, &appErrors.IncorrectPasswordError{}) {
+			statusCode = http.StatusBadRequest
+		}
+
+		c.JSON(statusCode, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.Header("Token", tokenString)
+	c.Status(http.StatusAccepted)
 }
