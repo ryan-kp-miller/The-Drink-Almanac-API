@@ -23,3 +23,15 @@ func (e FavoriteAlreadyExistsError) Error() string {
 func NewFavoriteAlreadyExistsError(message string) FavoriteAlreadyExistsError {
 	return FavoriteAlreadyExistsError{message: message}
 }
+
+type UserNotFoundError struct {
+	message string
+}
+
+func (e UserNotFoundError) Error() string {
+	return e.message
+}
+
+func NewUserNotFoundError(message string) UserNotFoundError {
+	return UserNotFoundError{message: message}
+}
