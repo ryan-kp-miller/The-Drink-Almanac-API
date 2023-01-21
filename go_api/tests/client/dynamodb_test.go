@@ -2,7 +2,7 @@ package store
 
 import (
 	"testing"
-	"the-drink-almanac-api/store"
+	"the-drink-almanac-api/client"
 )
 
 func TestDefaultEnv(t *testing.T) {
@@ -40,7 +40,7 @@ func TestDefaultEnv(t *testing.T) {
 			if tt.shouldSetEnv {
 				t.Setenv(tt.args.envVarName, tt.want)
 			}
-			if got := store.DefaultEnv(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
+			if got := client.DefaultEnv(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
 				t.Errorf("DefaultEnv() = %v, want %v", got, tt.want)
 			}
 		})
