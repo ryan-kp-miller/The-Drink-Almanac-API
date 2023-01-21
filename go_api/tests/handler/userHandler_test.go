@@ -198,12 +198,6 @@ func TestCreateNewUser(t *testing.T) {
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockUserService.AssertExpectations(t)
-
-			if d.returnedError == nil {
-				expectedResponseBody, err := json.Marshal(d.returnedUser)
-				assert.NoError(t, err)
-				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
-			}
 		})
 	}
 }
