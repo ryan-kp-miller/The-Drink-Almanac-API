@@ -1,9 +1,9 @@
 go test ./go_api/... -v -covermode=atomic -coverprofile=./go_api/coverage_raw.txt -coverpkg=./go_api/...
 RETVAL=$?
 
-# if any of the tests pass, exit script with non-zero code
+# if any of the tests fail, exit script with non-zero code
 # to force the github actions step to fail
-if [[ ${RETVAL}] != 0 ]; then
+if [[ ${RETVAL} != 0 ]]; then
     echo "At least one test failed, so exiting the script"
     exit -1
 fi
