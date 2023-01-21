@@ -10,6 +10,8 @@ The original API was built using Python and Heroku. This version will use Golang
 - [How to Run Locally](#how-to-run-locally)
 - [Endpoints](#endpoints)
 - [To Do](#to-do)
+  - [Unfinished](#unfinished)
+  - [Finished](#finished)
 
 
 ## How to Run Locally
@@ -22,6 +24,7 @@ AWS_DEFAULT_REGION="us-east-1"
 AWS_ACCESS_KEY_ID="local"
 AWS_SECRET_ACCESS_KEY="local"
 AWS_SESSION_TOKEN="local"
+JWT_SECRET_KEY="some_secret_key_value" # replace this value with something more secure
 ```
 
 Then, run the `make up` command. This will start up docker containers for localstack, dynamodb-admin, and the api. The api will be available at `localhost:8000` and dynamodb-admin at `localhost:8001`.
@@ -46,6 +49,26 @@ To stop the api, run the `make down` command.
 
 ## To Do
 
+### Unfinished
+
+- Create endpoints for:
+  - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
+  - [ ] Update delete user method to also delete any favorites associated with that user
+    - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
+    - [ ] Add favorite store field to UserService
+  - [ ] User authentication
+- [ ] Update existing endpoints to use user authorization (access tokens)
+- [ ] Move hardcoded table names and other env variables to an app config struct
+- [ ] Add better logging
+- [ ] Swagger docs
+- [ ] Deploy API
+  - Terraform?
+- [ ] Set up CI/CD for automatically deploying changes
+- [ ] Add code coverage badge to repo's README
+
+
+### Finished
+
 - [x] Troubleshoot why drinkId and userId are no longer coming through since they were changed to strings
 - Create endpoints for:
   - [x] Create new users
@@ -53,15 +76,7 @@ To stop the api, run the `make down` command.
     - [x] Add validation logic inside the favorite service to verify that a favorite doesn't exist before creating a new one
   - [x] Delete a favorite using the favorite's id
   - [x] Fix create favorite post method to actually check if drink or user ids are empty
-  - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
   - [x] Add method to delete user 
-  - [ ] Update delete user method to also delete any favorites associated with that user
-    - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
-    - [ ] Add favorite store field to UserService
-  - [ ] User authentication
-- [ ] Set up Data Transfer Object types for request bodies and responses
-- [ ] Update existing endpoints to use user authorization (access tokens)
-- [ ] Move hardcoded table names and other env variables to an app config struct
 - [x] Write unit tests (80% or higher coverage)
   - [x] Favorites
     - [x] dto
@@ -74,9 +89,4 @@ To stop the api, run the `make down` command.
     - [x] service
     - [x] store
   - [x] Add tests to CICD pipeline
-- [ ] Add better logging
-- [ ] Swagger docs
-- [ ] Deploy API
-  - Terraform?
-- [ ] Set up CI/CD for automatically deploying changes
-- [ ] Add code coverage badge to repo's README
+- [x] Set up Data Transfer Object types for request bodies and responses
