@@ -1,4 +1,12 @@
 go test ./go_api/... -v -covermode=atomic -coverprofile=./go_api/coverage_raw.txt -coverpkg=./go_api/...
+RETVAL=$?
+
+# if any of the tests pass, exit script with non-zero code
+# to force the github actions step to fail
+if [[ ${RETVAL}] != 0 ]; then
+    echo "At least one test failed, so exiting the script"
+    exit -1
+fi
 
 # join the expressions together and then remove the leading delimiter
 file_path_regexp_to_ignore=("mocks" "Stub")
