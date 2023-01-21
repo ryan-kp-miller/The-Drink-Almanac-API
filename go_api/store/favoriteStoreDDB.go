@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"the-drink-almanac-api/client"
 	"the-drink-almanac-api/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -16,7 +17,7 @@ var (
 )
 
 type FavoriteStoreDDB struct {
-	DynamodbClient DDBClient
+	DynamodbClient client.DDBClient
 }
 
 func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
@@ -88,7 +89,7 @@ func (frd *FavoriteStoreDDB) DeleteFavorite(id string) error {
 }
 
 func NewFavoriteStoreDDB() (*FavoriteStoreDDB, error) {
-	ddbClient, err := CreateLocalClient()
+	ddbClient, err := client.CreateLocalDDBClient()
 	return &FavoriteStoreDDB{
 		DynamodbClient: ddbClient,
 	}, err

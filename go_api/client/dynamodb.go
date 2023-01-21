@@ -1,4 +1,4 @@
-package store
+package client
 
 import (
 	"context"
@@ -14,8 +14,8 @@ type DDBClient interface {
 	DeleteItem(context.Context, *dynamodb.DeleteItemInput, ...func(*dynamodb.Options)) (*dynamodb.DeleteItemOutput, error)
 }
 
-// CreateLocalClient creates a dynamodb client using environment variables
-func CreateLocalClient() (*dynamodb.Client, error) {
+// CreateLocalDDBClient creates a dynamodb client using environment variables
+func CreateLocalDDBClient() (*dynamodb.Client, error) {
 	awsEndpoint := DefaultEnv("AWS_ENDPOINT", "http://localstack:4566")
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"the-drink-almanac-api/client"
 	"the-drink-almanac-api/model"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -18,7 +19,7 @@ var (
 )
 
 type UserStoreDDB struct {
-	DynamodbClient DDBClient
+	DynamodbClient client.DDBClient
 }
 
 func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
@@ -108,7 +109,7 @@ func (usd *UserStoreDDB) DeleteUser(id string) error {
 }
 
 func NewUserStoreDDB() (*UserStoreDDB, error) {
-	ddbClient, err := CreateLocalClient()
+	ddbClient, err := client.CreateLocalDDBClient()
 	return &UserStoreDDB{
 		DynamodbClient: ddbClient,
 	}, err
