@@ -62,17 +62,17 @@ To stop the api, run the `make down` command.
 - [ ] Set up Data Transfer Object types for request bodies and responses
 - [ ] Update existing endpoints to use user authorization (access tokens)
 - [ ] Move hardcoded table names and other env variables to an app config struct
-- [ ] Write unit tests (80% or higher coverage)
-  - [ ] Favorites
+- [x] Write unit tests (80% or higher coverage)
+  - [x] Favorites
     - [x] dto
     - [x] handler
     - [x] service
-    - [ ] store
-  - [ ] Users
+    - [x] store
+  - [x] Users
     - [x] dto
     - [x] handler
     - [x] service
-    - [ ] store
+    - [x] store
   - [x] Add tests to CICD pipeline
 - [ ] Add better logging
 - [ ] Swagger docs
