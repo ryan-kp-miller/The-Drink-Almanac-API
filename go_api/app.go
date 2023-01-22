@@ -10,10 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type HelloWorld struct {
-	Hello string `json:"hello"`
-}
-
 func Start(port string) {
 	router := gin.Default()
 
