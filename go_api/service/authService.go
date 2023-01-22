@@ -19,11 +19,10 @@ type JwtAuthService struct {
 
 // CreateNewToken generates a new token with the provided userId stored in it and an expiry based on the provided number of minutes
 func (s JwtAuthService) CreateNewToken(userId string, expiryDurationMinutes int) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Duration(expiryDurationMinutes) * time.Minute)
-	claims["authorized"] = true
-	claims["userId"] = userId
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"exp":    time.Now().Add(time.Duration(expiryDurationMinutes) * time.Minute).Unix(),
+		"userId": userId,
+	})
 
 	tokenString, err := token.SignedString(s.authSecretKey)
 	if err != nil {
@@ -40,7 +39,7 @@ func (s JwtAuthService) ValidateToken(tokenString string) (string, error) {
 		if !ok {
 			return nil, appErrors.NewInvalidAuthTokenError("invalid token format")
 		}
-		return token, nil
+		return s.authSecretKey, nil
 	})
 	if err != nil {
 		return "", err
