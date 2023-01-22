@@ -233,15 +233,16 @@ func TestDeleteUser(t *testing.T) {
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockUserService := mocks.NewUserService(t)
-			mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
+			mockUserService.On("DeleteUser", "testToken").Return(d.returnedError)
 			userHandler := handler.UserHandlers{Service: mockUserService}
 
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/user/%s", d.userId), nil)
+			request, err := http.NewRequest(http.MethodDelete, "/user", nil)
+			request.Header["Token"] = []string{"testToken"}
 			assert.NoError(t, err)
 
 			router := gin.Default()
-			router.DELETE("/user/:userId", userHandler.DeleteUser)
+			router.DELETE("/user", userHandler.DeleteUser)
 			router.ServeHTTP(rr, request)
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)

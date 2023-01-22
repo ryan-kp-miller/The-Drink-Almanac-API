@@ -36,13 +36,13 @@ func (_m *UserService) CreateNewUser(username string, password string) (*model.U
 	return r0, r1
 }
 
-// DeleteUser provides a mock function with given fields: id
-func (_m *UserService) DeleteUser(id string) error {
-	ret := _m.Called(id)
+// DeleteUser provides a mock function with given fields: tokenString
+func (_m *UserService) DeleteUser(tokenString string) error {
+	ret := _m.Called(tokenString)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(id)
+		r0 = rf(tokenString)
 	} else {
 		r0 = ret.Error(0)
 	}
