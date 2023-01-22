@@ -17,24 +17,25 @@ func Start(port string) {
 	router.GET("", hello_world_handler)
 
 	// set up favorite endpoints
-	fr, _ := store.NewFavoriteStoreDDB()
-	fs := service.NewDefaultFavoriteService(fr)
-	fh := handler.FavoriteHandlers{Service: fs}
+	favoriteStore, _ := store.NewFavoriteStoreDDB()
+	favoriteService := service.NewDefaultFavoriteService(favoriteStore)
+	favoriteHandlers := handler.FavoriteHandlers{Service: favoriteService}
 	favoriteRouteGroup := router.Group("/favorite")
-	favoriteRouteGroup.GET("/", fh.FindAllFavorites)
-	favoriteRouteGroup.GET("/:userId", fh.FindFavoritesByUser)
-	favoriteRouteGroup.POST("/", fh.CreateNewFavorite)
-	favoriteRouteGroup.DELETE("/:favoriteId", fh.DeleteFavorite)
+	favoriteRouteGroup.GET("/", favoriteHandlers.FindAllFavorites)
+	favoriteRouteGroup.GET("/:userId", favoriteHandlers.FindFavoritesByUser)
+	favoriteRouteGroup.POST("/", favoriteHandlers.CreateNewFavorite)
+	favoriteRouteGroup.DELETE("/:favoriteId", favoriteHandlers.DeleteFavorite)
 
 	// set up user endpoints
-	ur, _ := store.NewUserStoreDDB()
-	us := service.NewDefaultUserService(ur)
-	uh := handler.UserHandlers{Service: us}
+	userStore, _ := store.NewUserStoreDDB()
+	authService := service.NewJwtAuthService()
+	userService := service.NewDefaultUserService(userStore, authService)
+	userHandlers := handler.UserHandlers{Service: userService}
 	userRouteGroup := router.Group("/user")
-	userRouteGroup.GET("", uh.FindAllUsers)
-	userRouteGroup.POST("/", uh.CreateNewUser)
-	userRouteGroup.DELETE("/:userId", uh.DeleteUser)
-	userRouteGroup.POST("/login", uh.Login)
+	userRouteGroup.GET("", userHandlers.FindAllUsers)
+	userRouteGroup.POST("", userHandlers.CreateNewUser)
+	userRouteGroup.DELETE("", userHandlers.DeleteUser)
+	userRouteGroup.POST("/login", userHandlers.Login)
 
 	// running the app
 	router.Run(fmt.Sprintf(":%s", port))

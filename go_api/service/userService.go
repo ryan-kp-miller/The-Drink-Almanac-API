@@ -12,7 +12,7 @@ import (
 type UserService interface {
 	FindAllUsers() ([]model.User, error)
 	CreateNewUser(username, password string) (*model.User, error)
-	DeleteUser(id string) error
+	DeleteUser(tokenString string) error
 	Login(username, password string) (string, error)
 }
 
@@ -74,9 +74,13 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 }
 
 // DeleteUser removes the user's record from the user store
-// based on the provided id
-func (s DefaultUserService) DeleteUser(id string) error {
-	return s.store.DeleteUser(id)
+// based on the userId in the provided token
+func (s DefaultUserService) DeleteUser(tokenString string) error {
+	userId, err := s.authService.ValidateToken(tokenString)
+	if err != nil {
+		return err
+	}
+	return s.store.DeleteUser(userId)
 }
 
 // Login checks if a user exists with the provided username and password;
@@ -110,9 +114,9 @@ func (s DefaultUserService) Login(username, password string) (string, error) {
 	return s.authService.CreateNewToken(user.Id, 60*24)
 }
 
-func NewDefaultUserService(store model.UserStore) DefaultUserService {
+func NewDefaultUserService(store model.UserStore, authService AuthService) DefaultUserService {
 	return DefaultUserService{
 		store:       store,
-		authService: NewJwtAuthService(),
+		authService: authService,
 	}
 }

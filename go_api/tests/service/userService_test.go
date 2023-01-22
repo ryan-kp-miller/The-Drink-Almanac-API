@@ -175,19 +175,21 @@ func TestDefaultUserService_CreateNewUser(t *testing.T) {
 func TestDefaultUserService_DeleteUser(t *testing.T) {
 	tests := []struct {
 		name          string
-		id            string
+		tokenString   string
+		isAuthorized  bool
 		returnedError error
 		expectError   bool
 	}{
 		{
-			name:          "Successfully retrieved users",
-			id:            "0",
+			name:          "Successfully delete user",
+			tokenString:   "0",
+			isAuthorized:  true,
 			returnedError: nil,
 			expectError:   false,
 		},
 		{
-			name:          "Failed to retrieve users",
-			id:            "0",
+			name:          "Failed to delete user",
+			tokenString:   "0",
 			returnedError: fmt.Errorf("failed to retrieve users"),
 			expectError:   true,
 		},

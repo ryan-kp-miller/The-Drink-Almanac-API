@@ -68,10 +68,14 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 }
 
 func (uh *UserHandlers) DeleteUser(c *gin.Context) {
-	userId := c.Param("userId")
-	err := uh.Service.DeleteUser(userId)
+	tokenString := c.Request.Header["Token"][0]
+	err := uh.Service.DeleteUser(tokenString)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		statusCode := http.StatusInternalServerError
+		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {
+			statusCode = http.StatusForbidden
+		}
+		c.JSON(statusCode, gin.H{"message": err.Error()})
 		return
 	}
 
