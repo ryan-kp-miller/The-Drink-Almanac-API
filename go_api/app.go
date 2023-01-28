@@ -23,9 +23,8 @@ func Start(port string) {
 	favoriteService := service.NewDefaultFavoriteService(favoriteStore)
 	favoriteHandlers := handler.FavoriteHandlers{Service: favoriteService}
 	favoriteRouteGroup := router.Group("/favorite")
-	favoriteRouteGroup.GET("/", favoriteHandlers.FindAllFavorites)
-	favoriteRouteGroup.GET("/:userId", favoriteHandlers.FindFavoritesByUser)
-	favoriteRouteGroup.POST("/", favoriteHandlers.CreateNewFavorite)
+	favoriteRouteGroup.GET("", favoriteHandlers.FindFavoritesByUser)
+	favoriteRouteGroup.POST("", favoriteHandlers.CreateNewFavorite)
 	favoriteRouteGroup.DELETE("/:favoriteId", favoriteHandlers.DeleteFavorite)
 
 	// set up user endpoints
@@ -34,7 +33,7 @@ func Start(port string) {
 	userService := service.NewDefaultUserService(userStore, authService)
 	userHandlers := handler.UserHandlers{Service: userService}
 	userRouteGroup := router.Group("/user")
-	userRouteGroup.GET("", userHandlers.FindAllUsers)
+	userRouteGroup.GET("", userHandlers.FindUser)
 	userRouteGroup.POST("", userHandlers.CreateNewUser)
 	userRouteGroup.DELETE("", userHandlers.DeleteUser)
 	userRouteGroup.POST("/login", userHandlers.Login)

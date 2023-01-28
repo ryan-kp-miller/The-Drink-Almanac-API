@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/store"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -11,13 +12,14 @@ import (
 
 type UserService interface {
 	FindAllUsers() ([]model.User, error)
+	FindUser(userId string) (*model.User, error)
 	CreateNewUser(username, password string) (*model.User, error)
 	DeleteUser(tokenString string) error
 	Login(username, password string) (string, error)
 }
 
 type DefaultUserService struct {
-	store       model.UserStore
+	store       store.UserStore
 	authService AuthService
 }
 
@@ -29,6 +31,16 @@ func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
 	return s.store.FindAll()
 }
 
+// FindUser retrieves the user's id from the auth token and uses the id to retrieve the user's information
+func (s DefaultUserService) FindUser(tokenString string) (*model.User, error) {
+	userId, err := s.authService.ValidateToken(tokenString)
+	if err != nil {
+		return nil, err
+	}
+	return s.store.FindUserById(userId)
+}
+
+// getHashedPassword takes the raw password and hashes it for protection
 func (s DefaultUserService) getHashedPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 8)
 	if err != nil {
@@ -114,7 +126,7 @@ func (s DefaultUserService) Login(username, password string) (string, error) {
 	return s.authService.CreateNewToken(user.Id, 60*24)
 }
 
-func NewDefaultUserService(store model.UserStore, authService AuthService) DefaultUserService {
+func NewDefaultUserService(store store.UserStore, authService AuthService) DefaultUserService {
 	return DefaultUserService{
 		store:       store,
 		authService: authService,

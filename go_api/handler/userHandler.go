@@ -24,8 +24,29 @@ func (uh *UserHandlers) FindAllUsers(c *gin.Context) {
 		})
 		return
 	}
+	usersResponse := dto.NewUsersResponse(users)
+	c.JSON(http.StatusOK, usersResponse)
+}
 
-	c.JSON(http.StatusOK, users)
+func (uh *UserHandlers) FindUser(c *gin.Context) {
+	tokens := c.Request.Header["Token"]
+	if len(tokens) == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
+		return
+	}
+
+	tokenString := tokens[0]
+	user, err := uh.Service.FindUser(tokenString)
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {
+			statusCode = http.StatusForbidden
+		}
+		c.JSON(statusCode, gin.H{"message": err.Error()})
+		return
+	}
+	userResponse := dto.NewUserResponse(*user)
+	c.JSON(http.StatusOK, userResponse)
 }
 
 func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
@@ -68,7 +89,13 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 }
 
 func (uh *UserHandlers) DeleteUser(c *gin.Context) {
-	tokenString := c.Request.Header["Token"][0]
+	tokens := c.Request.Header["Token"]
+	if len(tokens) == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
+		return
+	}
+
+	tokenString := tokens[0]
 	err := uh.Service.DeleteUser(tokenString)
 	if err != nil {
 		statusCode := http.StatusInternalServerError

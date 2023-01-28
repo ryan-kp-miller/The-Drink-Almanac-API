@@ -104,7 +104,7 @@ func (usd *UserStoreDDB) FindUserById(userId string) (*model.User, error) {
 		TableName:                 aws.String(usd.TableName),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
-		KeyConditionExpression:    filterExpression.Condition(),
+		KeyConditionExpression:    filterExpression.KeyCondition(),
 	}
 	ctx := context.TODO()
 	queryOutput, err := usd.DynamodbClient.Query(ctx, &scanInput)

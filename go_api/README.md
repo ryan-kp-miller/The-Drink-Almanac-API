@@ -71,6 +71,8 @@ To stop the api, run the `make down` command.
 - [ ] Set up CI/CD for automatically deploying changes
 - [ ] Add code coverage badge to repo's README
 - [ ] Update frontend to use new drink endpoint
+- [ ] Move auth validation from handlers to a middleware
+- [ ] Add `create_ts` for users and favorites
 
 
 ### Finished
