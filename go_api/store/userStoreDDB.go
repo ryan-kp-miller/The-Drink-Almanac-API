@@ -14,6 +14,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
+type UserStore interface {
+	FindAll() ([]model.User, error)
+	FindUserById(userId string) (*model.User, error)
+	FindUserByUsername(username string) (*model.User, error)
+	CreateNewUser(model.User) error
+	DeleteUser(id string) error
+}
+
 type UserStoreDDB struct {
 	DynamodbClient client.DDBClient
 	TableName      string
@@ -74,7 +82,48 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 	case 1:
 		return &users[0], nil
 	default:
-		return nil, fmt.Errorf("there are %s users with the username %s", strconv.Itoa(len(users)), username)
+		return nil, fmt.Errorf("there are %s users with the username '%s'", strconv.Itoa(len(users)), username)
+	}
+}
+
+// FindUserById checks the store's user table for any users with the given userId;
+//
+// Returns:
+//   - an error if there are multiple users with that username
+//   - the user if there is only 1 user
+//   - nil if there are 0 users
+func (usd *UserStoreDDB) FindUserById(userId string) (*model.User, error) {
+	filterExpression, err := expression.NewBuilder().WithKeyCondition(
+		expression.Key("id").Equal(expression.Value(userId)),
+	).Build()
+	if err != nil {
+		return nil, err
+	}
+
+	scanInput := dynamodb.QueryInput{
+		TableName:                 aws.String(usd.TableName),
+		ExpressionAttributeNames:  filterExpression.Names(),
+		ExpressionAttributeValues: filterExpression.Values(),
+		KeyConditionExpression:    filterExpression.Condition(),
+	}
+	ctx := context.TODO()
+	queryOutput, err := usd.DynamodbClient.Query(ctx, &scanInput)
+	if err != nil {
+		return nil, err
+	}
+	users := []model.User{}
+	err = attributevalue.UnmarshalListOfMaps(queryOutput.Items, &users)
+	if err != nil {
+		return nil, err
+	}
+
+	switch num_users := len(users); num_users {
+	case 0:
+		return nil, nil
+	case 1:
+		return &users[0], nil
+	default:
+		return nil, fmt.Errorf("there are %s users with the id '%s'", strconv.Itoa(len(users)), userId)
 	}
 }
 
