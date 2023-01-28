@@ -10,7 +10,7 @@ import (
 
 type FavoriteService interface {
 	FindAllFavorites() ([]model.Favorite, error)
-	FindFavoritesByUser(userID string) ([]model.Favorite, error)
+	FindFavoritesByUser(userId string) ([]model.Favorite, error)
 	CreateNewFavorite(userId, drinkId string) (*model.Favorite, error)
 	DeleteFavorite(id string) error
 }
@@ -23,6 +23,7 @@ func (s DefaultFavoriteService) FindAllFavorites() ([]model.Favorite, error) {
 	return s.store.FindAll()
 }
 
+// FindFavoritesByUser retrieves favorites based on the user's id
 func (s DefaultFavoriteService) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
 	return s.store.FindFavoritesByUser(userId)
 }

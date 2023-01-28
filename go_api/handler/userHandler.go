@@ -12,12 +12,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandlers struct {
-	Service service.UserService
+type UserHandler struct {
+	userService service.UserService
+	authService service.AuthService
 }
 
-func (uh *UserHandlers) FindAllUsers(c *gin.Context) {
-	users, err := uh.Service.FindAllUsers()
+func (uh *UserHandler) FindAllUsers(c *gin.Context) {
+	users, err := uh.userService.FindAllUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
@@ -28,15 +29,18 @@ func (uh *UserHandlers) FindAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, usersResponse)
 }
 
-func (uh *UserHandlers) FindUser(c *gin.Context) {
+func (uh *UserHandler) FindUser(c *gin.Context) {
 	tokens := c.Request.Header["Token"]
 	if len(tokens) == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
 		return
 	}
-
-	tokenString := tokens[0]
-	user, err := uh.Service.FindUser(tokenString)
+	userId, err := uh.authService.ValidateToken(tokens[0])
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was invalid"})
+		return
+	}
+	user, err := uh.userService.FindUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {
@@ -49,7 +53,7 @@ func (uh *UserHandlers) FindUser(c *gin.Context) {
 	c.JSON(http.StatusOK, userResponse)
 }
 
-func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
+func (uh *UserHandler) CreateNewUser(c *gin.Context) {
 	var userRequest dto.UserPostRequest
 	err := c.BindJSON(&userRequest)
 	if err != nil {
@@ -72,7 +76,7 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 		})
 		return
 	}
-	user, err := uh.Service.CreateNewUser(userRequest.Username, userRequest.Password)
+	user, err := uh.userService.CreateNewUser(userRequest.Username, userRequest.Password)
 	if err != nil {
 		if errors.As(err, &appErrors.UserAlreadyExistsError{}) {
 			c.JSON(http.StatusConflict, gin.H{
@@ -88,7 +92,7 @@ func (uh *UserHandlers) CreateNewUser(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
-func (uh *UserHandlers) DeleteUser(c *gin.Context) {
+func (uh *UserHandler) DeleteUser(c *gin.Context) {
 	tokens := c.Request.Header["Token"]
 	if len(tokens) == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
@@ -96,7 +100,7 @@ func (uh *UserHandlers) DeleteUser(c *gin.Context) {
 	}
 
 	tokenString := tokens[0]
-	err := uh.Service.DeleteUser(tokenString)
+	err := uh.userService.DeleteUser(tokenString)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {
@@ -109,7 +113,7 @@ func (uh *UserHandlers) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{"message": "the user was deleted"})
 }
 
-func (uh *UserHandlers) Login(c *gin.Context) {
+func (uh *UserHandler) Login(c *gin.Context) {
 	var userRequest dto.UserPostRequest
 	err := c.BindJSON(&userRequest)
 	if err != nil {
@@ -126,17 +130,17 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "please provide the username and password in the body of your request"})
 		return
 	}
+
 	if err = userRequest.ValidateRequest(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
-	tokenString, err := uh.Service.Login(userRequest.Username, userRequest.Password)
+
+	user, err := uh.userService.Login(userRequest.Username, userRequest.Password)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		// I tried using a switch statement to clean this up,
-		// but it wasn't picking up my custom errors types
 		if errors.As(err, &appErrors.UserNotFoundError{}) {
 			statusCode = http.StatusNotFound
 		}
@@ -148,6 +152,19 @@ func (uh *UserHandlers) Login(c *gin.Context) {
 		return
 	}
 
+	tokenString, err := uh.authService.CreateNewToken(user.Id, 60*24)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
 	c.Header("Token", tokenString)
 	c.Status(http.StatusAccepted)
+}
+
+func NewUserHandler(userService service.UserService, authService service.AuthService) UserHandler {
+	return UserHandler{
+		userService: userService,
+		authService: authService,
+	}
 }

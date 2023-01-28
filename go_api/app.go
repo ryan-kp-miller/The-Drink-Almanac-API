@@ -29,14 +29,14 @@ func Start(port string) {
 
 	// set up user endpoints
 	userStore, _ := store.NewUserStoreDDB(appConfig.UsersTableName, appConfig.AwsEndpoint)
+	userService := service.NewDefaultUserService(userStore)
 	authService := service.NewJwtAuthService(appConfig.JwtSecretKey)
-	userService := service.NewDefaultUserService(userStore, authService)
-	userHandlers := handler.UserHandlers{Service: userService}
+	userHandler := handler.NewUserHandler(userService, authService)
 	userRouteGroup := router.Group("/user")
-	userRouteGroup.GET("", userHandlers.FindUser)
-	userRouteGroup.POST("", userHandlers.CreateNewUser)
-	userRouteGroup.DELETE("", userHandlers.DeleteUser)
-	userRouteGroup.POST("/login", userHandlers.Login)
+	userRouteGroup.GET("", userHandler.FindUser)
+	userRouteGroup.POST("", userHandler.CreateNewUser)
+	userRouteGroup.DELETE("", userHandler.DeleteUser)
+	userRouteGroup.POST("/login", userHandler.Login)
 
 	// running the app
 	router.Run(fmt.Sprintf(":%s", port))

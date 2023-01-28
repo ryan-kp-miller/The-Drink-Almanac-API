@@ -56,7 +56,6 @@ To stop the api, run the `make down` command.
     - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
     - [ ] Add favorite store field to UserService
   - [ ] Update existing endpoints to use user authorization (access tokens)
-    - [ ] GET /user
     - [ ] GET /favorite (remove endpoint for retrieving all favorites for all users)
     - [ ] POST /favorite
     - [ ] DELETE /favorite
@@ -88,6 +87,7 @@ To stop the api, run the `make down` command.
   - [x] User authentication
   - [ ] Update existing endpoints to use user authorization (access tokens)
     - [x] DELETE /user
+    - [x] GET /user
 - [x] Write unit tests (80% or higher coverage)
   - [x] Favorites
     - [x] dto
