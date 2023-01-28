@@ -61,8 +61,6 @@ To stop the api, run the `make down` command.
     - [ ] POST /favorite
     - [ ] DELETE /favorite
   - [ ] Add endpoint for retrieving drink data
-- Abstract Dynamo-specific commands in the repositories (take out of services)
-- [ ] Move hardcoded table names and other env variables to an app config struct (using viper?)
 - [ ] More tests for new code
   - [ ] `UserService.Login`
   - [ ] `UserHandlers.Login`
@@ -101,3 +99,4 @@ To stop the api, run the `make down` command.
     - [x] store
   - [x] Add tests to CICD pipeline
 - [x] Set up Data Transfer Object types for request bodies and responses
+- [x] Move hardcoded table names and other env variables to an app config struct
