@@ -39,7 +39,7 @@ func TestJwtAuthService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			authService := service.NewJwtAuthService()
+			authService := service.NewJwtAuthService("testToken")
 
 			var tokenString string
 			if !tt.useFakeToken {

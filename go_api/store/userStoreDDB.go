@@ -14,17 +14,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-var (
-	USERS_TABLE_NAME string = "the-drink-almanac-users"
-)
-
 type UserStoreDDB struct {
 	DynamodbClient client.DDBClient
+	TableName      string
 }
 
 func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
 	scanInput := dynamodb.ScanInput{
-		TableName: aws.String(USERS_TABLE_NAME),
+		TableName: aws.String(usd.TableName),
 	}
 	ctx := context.TODO()
 	scanOutput, err := usd.DynamodbClient.Scan(ctx, &scanInput)
@@ -55,7 +52,7 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 	}
 
 	scanInput := dynamodb.ScanInput{
-		TableName:                 aws.String(USERS_TABLE_NAME),
+		TableName:                 aws.String(usd.TableName),
 		FilterExpression:          filterExpression.Filter(),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
@@ -86,7 +83,7 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 // Please ensure that you aren't inserting a duplicate record (i.e. user with that username already exists)
 func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
 	_, err := usd.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(USERS_TABLE_NAME),
+		TableName: aws.String(usd.TableName),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: user.Id},
 			"username": &types.AttributeValueMemberS{Value: user.Username},
@@ -100,7 +97,7 @@ func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
 // from the store's user table
 func (usd *UserStoreDDB) DeleteUser(id string) error {
 	_, err := usd.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
-		TableName: aws.String(USERS_TABLE_NAME),
+		TableName: aws.String(usd.TableName),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: id},
 		},
@@ -108,9 +105,10 @@ func (usd *UserStoreDDB) DeleteUser(id string) error {
 	return err
 }
 
-func NewUserStoreDDB() (*UserStoreDDB, error) {
-	ddbClient, err := client.CreateLocalDDBClient()
+func NewUserStoreDDB(tableName string, awsEndpoint string) (*UserStoreDDB, error) {
+	ddbClient, err := client.CreateLocalDDBClient(awsEndpoint)
 	return &UserStoreDDB{
 		DynamodbClient: ddbClient,
+		TableName:      tableName,
 	}, err
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"the-drink-almanac-api/handler"
+	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
 	"the-drink-almanac-api/store"
 
@@ -11,13 +12,14 @@ import (
 )
 
 func Start(port string) {
+	appConfig := model.NewAppConfig()
 	router := gin.Default()
 
 	// set up default endpoint
 	router.GET("", hello_world_handler)
 
 	// set up favorite endpoints
-	favoriteStore, _ := store.NewFavoriteStoreDDB()
+	favoriteStore, _ := store.NewFavoriteStoreDDB(appConfig.FavoritesTableName, appConfig.AwsEndpoint)
 	favoriteService := service.NewDefaultFavoriteService(favoriteStore)
 	favoriteHandlers := handler.FavoriteHandlers{Service: favoriteService}
 	favoriteRouteGroup := router.Group("/favorite")
@@ -27,8 +29,8 @@ func Start(port string) {
 	favoriteRouteGroup.DELETE("/:favoriteId", favoriteHandlers.DeleteFavorite)
 
 	// set up user endpoints
-	userStore, _ := store.NewUserStoreDDB()
-	authService := service.NewJwtAuthService()
+	userStore, _ := store.NewUserStoreDDB(appConfig.UsersTableName, appConfig.AwsEndpoint)
+	authService := service.NewJwtAuthService(appConfig.JwtSecretKey)
 	userService := service.NewDefaultUserService(userStore, authService)
 	userHandlers := handler.UserHandlers{Service: userService}
 	userRouteGroup := router.Group("/user")

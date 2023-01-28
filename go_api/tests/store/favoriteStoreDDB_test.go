@@ -35,7 +35,7 @@ func TestFavoriteStoreDDB_FindAll(t *testing.T) {
 	}
 	scanOutput := &dynamodb.ScanOutput{Items: favoriteItems}
 	scanInput := &dynamodb.ScanInput{
-		TableName: aws.String("the-drink-almanac-favorites"),
+		TableName: aws.String(""),
 	}
 	tests := []struct {
 		name              string
@@ -137,7 +137,7 @@ func TestFavoriteStoreDDB_CreateNewFavorite(t *testing.T) {
 		UserId:  "0",
 	}
 	putItemInput := &dynamodb.PutItemInput{
-		TableName: aws.String("the-drink-almanac-favorites"),
+		TableName: aws.String(""),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: mockFavorite.Id},
 			"user_id":  &types.AttributeValueMemberS{Value: mockFavorite.DrinkId},
@@ -185,7 +185,7 @@ func TestFavoriteStoreDDB_DeleteFavorite(t *testing.T) {
 		UserId:  "0",
 	}
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("the-drink-almanac-favorites"),
+		TableName: aws.String(""),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: mockFavorite.Id},
 		},

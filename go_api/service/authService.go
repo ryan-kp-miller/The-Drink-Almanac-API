@@ -1,7 +1,6 @@
 package service
 
 import (
-	"os"
 	"the-drink-almanac-api/appErrors"
 	"time"
 
@@ -54,9 +53,8 @@ func (s JwtAuthService) ValidateToken(tokenString string) (string, error) {
 	}
 }
 
-func NewJwtAuthService() JwtAuthService {
-	authSecretKey := os.Getenv("JWT_SECRET_KEY")
+func NewJwtAuthService(secretKey string) JwtAuthService {
 	return JwtAuthService{
-		authSecretKey: []byte(authSecretKey),
+		authSecretKey: []byte(secretKey),
 	}
 }

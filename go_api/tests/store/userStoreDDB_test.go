@@ -34,9 +34,7 @@ func TestUserStoreDDB_FindAll(t *testing.T) {
 		}
 	}
 	scanOutput := &dynamodb.ScanOutput{Items: userItems}
-	scanInput := &dynamodb.ScanInput{
-		TableName: aws.String("the-drink-almanac-users"),
-	}
+	scanInput := &dynamodb.ScanInput{TableName: aws.String("")}
 	tests := []struct {
 		name          string
 		expectedUsers []model.User
@@ -153,7 +151,7 @@ func TestUserStoreDDB_CreateNewUser(t *testing.T) {
 		Password: "0",
 	}
 	putItemInput := &dynamodb.PutItemInput{
-		TableName: aws.String("the-drink-almanac-users"),
+		TableName: aws.String(""),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: mockUser.Id},
 			"username": &types.AttributeValueMemberS{Value: mockUser.Username},
@@ -201,7 +199,7 @@ func TestUserStoreDDB_DeleteUser(t *testing.T) {
 		Password: "0",
 	}
 	deleteItemInput := &dynamodb.DeleteItemInput{
-		TableName: aws.String("the-drink-almanac-users"),
+		TableName: aws.String(""),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: mockUser.Id},
 		},

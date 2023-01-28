@@ -18,8 +18,7 @@ The original API was built using Python and Heroku. This version will use Golang
 
 First, create a `.env` file in the top-level directory with the following fields:
 ```
-API_PORT="8000"
-AWS_ENDPOINT=http://localstack:4566
+ENV="local"
 AWS_DEFAULT_REGION="us-east-1"
 AWS_ACCESS_KEY_ID="local"
 AWS_SECRET_ACCESS_KEY="local"
@@ -61,6 +60,8 @@ To stop the api, run the `make down` command.
     - [ ] GET /favorite (remove endpoint for retrieving all favorites for all users)
     - [ ] POST /favorite
     - [ ] DELETE /favorite
+  - [ ] Add endpoint for retrieving drink data
+- Abstract Dynamo-specific commands in the repositories (take out of services)
 - [ ] Move hardcoded table names and other env variables to an app config struct (using viper?)
 - [ ] More tests for new code
   - [ ] `UserService.Login`
@@ -71,6 +72,7 @@ To stop the api, run the `make down` command.
   - Terraform?
 - [ ] Set up CI/CD for automatically deploying changes
 - [ ] Add code coverage badge to repo's README
+- [ ] Update frontend to use new drink endpoint
 
 
 ### Finished

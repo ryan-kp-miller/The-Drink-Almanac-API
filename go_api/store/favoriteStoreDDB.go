@@ -12,20 +12,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-var (
-	FAVORITES_TABLE_NAME string = "the-drink-almanac-favorites"
-)
-
 type FavoriteStoreDDB struct {
 	DynamodbClient client.DDBClient
+	TableName      string
 }
 
-func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
+func (fsd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
 	scanInput := dynamodb.ScanInput{
-		TableName: aws.String("the-drink-almanac-favorites"),
+		TableName: aws.String(fsd.TableName),
 	}
 	ctx := context.TODO()
-	scanOutput, err := frd.DynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := fsd.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +35,7 @@ func (frd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
 	return favorites, nil
 }
 
-func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
+func (fsd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
 	filterExpression, err := expression.NewBuilder().WithFilter(
 		expression.Equal(expression.Name("user_id"), expression.Value(userId)),
 	).Build()
@@ -47,13 +44,13 @@ func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorit
 	}
 
 	scanInput := dynamodb.ScanInput{
-		TableName:                 aws.String(FAVORITES_TABLE_NAME),
+		TableName:                 aws.String(fsd.TableName),
 		FilterExpression:          filterExpression.Filter(),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
 	}
 	ctx := context.TODO()
-	scanOutput, err := frd.DynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := fsd.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +63,9 @@ func (frd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorit
 	return favorites, nil
 }
 
-func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
-	_, err := frd.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(FAVORITES_TABLE_NAME),
+func (fsd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
+	_, err := fsd.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(fsd.TableName),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: favorite.Id},
 			"drink_id": &types.AttributeValueMemberS{Value: favorite.DrinkId},
@@ -78,9 +75,9 @@ func (frd *FavoriteStoreDDB) CreateNewFavorite(favorite model.Favorite) error {
 	return err
 }
 
-func (frd *FavoriteStoreDDB) DeleteFavorite(id string) error {
-	_, err := frd.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
-		TableName: aws.String(FAVORITES_TABLE_NAME),
+func (fsd *FavoriteStoreDDB) DeleteFavorite(id string) error {
+	_, err := fsd.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+		TableName: aws.String(fsd.TableName),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: id},
 		},
@@ -88,9 +85,10 @@ func (frd *FavoriteStoreDDB) DeleteFavorite(id string) error {
 	return err
 }
 
-func NewFavoriteStoreDDB() (*FavoriteStoreDDB, error) {
-	ddbClient, err := client.CreateLocalDDBClient()
+func NewFavoriteStoreDDB(tableName, awsEndpoint string) (*FavoriteStoreDDB, error) {
+	ddbClient, err := client.CreateLocalDDBClient(awsEndpoint)
 	return &FavoriteStoreDDB{
 		DynamodbClient: ddbClient,
+		TableName:      tableName,
 	}, err
 }
