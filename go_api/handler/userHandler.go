@@ -98,9 +98,13 @@ func (uh *UserHandler) DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
 		return
 	}
+	userId, err := uh.authService.ValidateToken(tokens[0])
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was invalid"})
+		return
+	}
 
-	tokenString := tokens[0]
-	err := uh.userService.DeleteUser(tokenString)
+	err = uh.userService.DeleteUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {

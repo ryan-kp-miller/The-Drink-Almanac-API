@@ -73,15 +73,40 @@ func (_m *UserService) FindAllUsers() ([]model.User, error) {
 	return r0, r1
 }
 
+// FindUser provides a mock function with given fields: userId
+func (_m *UserService) FindUser(userId string) (*model.User, error) {
+	ret := _m.Called(userId)
+
+	var r0 *model.User
+	if rf, ok := ret.Get(0).(func(string) *model.User); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Login provides a mock function with given fields: username, password
-func (_m *UserService) Login(username string, password string) (string, error) {
+func (_m *UserService) Login(username string, password string) (*model.User, error) {
 	ret := _m.Called(username, password)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(string, string) string); ok {
+	var r0 *model.User
+	if rf, ok := ret.Get(0).(func(string, string) *model.User); ok {
 		r0 = rf(username, password)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
 	}
 
 	var r1 error

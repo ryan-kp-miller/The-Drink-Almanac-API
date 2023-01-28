@@ -54,8 +54,7 @@ func TestDefaultUserService_FindAllUsers(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockUserStore := mocks.NewUserStore(t)
 			mockUserStore.On("FindAll").Return(tt.returnedUsers, tt.returnedError)
-			mockAuthService := mocks.NewAuthService(t)
-			userService := service.NewDefaultUserService(mockUserStore, mockAuthService)
+			userService := service.NewDefaultUserService(mockUserStore)
 			users, err := userService.FindAllUsers()
 			assert.Equal(t, users, tt.returnedUsers, "The users returned by FindAllUsers() does not match the expected users; actual users = %v; expected users = %v", users, tt.returnedUsers)
 			if tt.expectError {
@@ -151,8 +150,7 @@ func TestDefaultUserService_CreateNewUser(t *testing.T) {
 				mockUserStore.On("CreateNewUser", mock.AnythingOfType("model.User")).Return(tt.returnedError)
 			}
 
-			mockAuthService := mocks.NewAuthService(t)
-			userService := service.NewDefaultUserService(mockUserStore, mockAuthService)
+			userService := service.NewDefaultUserService(mockUserStore)
 			user, err := userService.CreateNewUser(tt.username, tt.password)
 			if tt.expectError {
 				assert.NotNil(t, err, "An error should have been returned from userService.CreateNewUser")
@@ -177,45 +175,35 @@ func TestDefaultUserService_CreateNewUser(t *testing.T) {
 func TestDefaultUserService_DeleteUser(t *testing.T) {
 	tests := []struct {
 		name               string
-		tokenString        string
+		userId             string
 		storeReturnedError error
 		authReturnedError  error
 		expectError        bool
 	}{
 		{
 			name:               "Successfully delete user",
-			tokenString:        "0",
+			userId:             "0",
 			storeReturnedError: nil,
 			authReturnedError:  nil,
 			expectError:        false,
 		},
 		{
 			name:               "Failed to delete user",
-			tokenString:        "0",
+			userId:             "0",
 			storeReturnedError: fmt.Errorf("failed to delete users"),
 			authReturnedError:  nil,
-			expectError:        true,
-		},
-		{
-			name:               "Not authorized to delete user",
-			tokenString:        "0",
-			storeReturnedError: nil,
-			authReturnedError:  fmt.Errorf("not authorized to delete users"),
 			expectError:        true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockAuthService := mocks.NewAuthService(t)
-			mockAuthService.On("ValidateToken", tt.tokenString).Return("testId", tt.authReturnedError)
-
 			mockUserStore := mocks.NewUserStore(t)
 			if tt.authReturnedError == nil {
-				mockUserStore.On("DeleteUser", "testId").Return(tt.storeReturnedError)
+				mockUserStore.On("DeleteUser", tt.userId).Return(tt.storeReturnedError)
 			}
 
-			userService := service.NewDefaultUserService(mockUserStore, mockAuthService)
-			err := userService.DeleteUser(tt.tokenString)
+			userService := service.NewDefaultUserService(mockUserStore)
+			err := userService.DeleteUser(tt.userId)
 
 			if tt.expectError {
 				assert.NotNil(t, err, "An error should have been returned from userService.DeleteUser")

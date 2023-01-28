@@ -22,7 +22,7 @@ type UserService interface {
 	CreateNewUser(username, password string) (*model.User, error)
 
 	// DeleteUser removes the user's record from the user store
-	DeleteUser(tokenString string) error
+	DeleteUser(userId string) error
 
 	// Login checks if a user exists with the provided username and password;
 	// if a user exists:

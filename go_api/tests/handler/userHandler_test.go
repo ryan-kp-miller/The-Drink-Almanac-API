@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"the-drink-almanac-api/appErrors"
+	"the-drink-almanac-api/dto"
 	"the-drink-almanac-api/handler"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
@@ -59,7 +60,8 @@ func TestFindAllUsers(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockUserService := mocks.NewUserService(t)
 			mockUserService.On("FindAllUsers").Return(d.returnedUsers, d.returnedError)
-			userHandler := handler.UserHandlers{Service: mockUserService}
+			mockAuthService := mocks.NewAuthService(t)
+			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/user", nil)
@@ -73,7 +75,8 @@ func TestFindAllUsers(t *testing.T) {
 			mockUserService.AssertExpectations(t)
 
 			if d.returnedUsers != nil {
-				expectedResponseBody, err := json.Marshal(d.returnedUsers)
+				usersResponse := dto.NewUsersResponse(d.returnedUsers)
+				expectedResponseBody, err := json.Marshal(usersResponse)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
 			}
@@ -186,7 +189,8 @@ func TestCreateNewUser(t *testing.T) {
 			if d.shouldMethodBeCalled {
 				mockUserService.On("CreateNewUser", d.username, d.password).Return(d.returnedUser, d.returnedError)
 			}
-			userHandler := handler.UserHandlers{Service: mockUserService}
+			mockAuthService := mocks.NewAuthService(t)
+			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodPost, "/user", bytes.NewBuffer(d.requestBody))
@@ -209,32 +213,47 @@ func TestDeleteUser(t *testing.T) {
 		userId             string
 		returnedError      error
 		expectedStatusCode int
+		authError          error
 	}{
 		{
 			testName:           "Successfully delete user",
 			userId:             "0",
 			returnedError:      nil,
 			expectedStatusCode: http.StatusNoContent,
+			authError:          nil,
 		},
 		{
 			testName:           "Failed to create user",
 			userId:             "0",
 			returnedError:      fmt.Errorf("failed to delete user"),
 			expectedStatusCode: http.StatusInternalServerError,
+			authError:          nil,
 		},
 		{
 			testName:           "No user exists",
 			userId:             "0",
 			returnedError:      nil,
 			expectedStatusCode: http.StatusNoContent,
+			authError:          nil,
+		},
+		{
+			testName:           "Not authorized",
+			userId:             "0",
+			returnedError:      nil,
+			expectedStatusCode: http.StatusUnauthorized,
+			authError:          fmt.Errorf("tsk tsk"),
 		},
 	}
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockUserService := mocks.NewUserService(t)
-			mockUserService.On("DeleteUser", "testToken").Return(d.returnedError)
-			userHandler := handler.UserHandlers{Service: mockUserService}
+			mockAuthService := mocks.NewAuthService(t)
+			mockAuthService.On("ValidateToken", "testToken").Return(d.userId, d.authError)
+			if d.authError == nil {
+				mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
+			}
+			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodDelete, "/user", nil)
