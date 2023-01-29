@@ -52,21 +52,23 @@ func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
 //   - the user if there is only 1 user
 //   - nil if there are 0 users
 func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error) {
-	filterExpression, err := expression.NewBuilder().WithFilter(
-		expression.Equal(expression.Name("username"), expression.Value(username)),
+	filterExpression, err := expression.NewBuilder().WithKeyCondition(
+		expression.Key("username").Equal(expression.Value(username)),
 	).Build()
 	if err != nil {
 		return nil, err
 	}
 
-	scanInput := dynamodb.ScanInput{
+	queryInput := dynamodb.QueryInput{
 		TableName:                 aws.String(usd.TableName),
-		FilterExpression:          filterExpression.Filter(),
+		IndexName:                 aws.String("username-index"),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
+		KeyConditionExpression:    filterExpression.KeyCondition(),
 	}
+
 	ctx := context.TODO()
-	scanOutput, err := usd.DynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := usd.DynamodbClient.Query(ctx, &queryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -100,14 +102,14 @@ func (usd *UserStoreDDB) FindUserById(userId string) (*model.User, error) {
 		return nil, err
 	}
 
-	scanInput := dynamodb.QueryInput{
+	queryInput := dynamodb.QueryInput{
 		TableName:                 aws.String(usd.TableName),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
 		KeyConditionExpression:    filterExpression.KeyCondition(),
 	}
 	ctx := context.TODO()
-	queryOutput, err := usd.DynamodbClient.Query(ctx, &scanInput)
+	queryOutput, err := usd.DynamodbClient.Query(ctx, &queryInput)
 	if err != nil {
 		return nil, err
 	}

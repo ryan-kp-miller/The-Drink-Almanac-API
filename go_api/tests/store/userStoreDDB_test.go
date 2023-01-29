@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -74,32 +75,30 @@ func TestUserStoreDDB_FindAll(t *testing.T) {
 func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 	numUsers := 5
 	userItems := make([]map[string]types.AttributeValue, numUsers)
-	mockUsers := make([]model.User, numUsers)
 	for i := 0; i < numUsers; i++ {
 		userItems[i] = map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: "0"},
 			"username": &types.AttributeValueMemberS{Value: "0"},
 			"password": &types.AttributeValueMemberS{Value: "0"},
 		}
-		mockUsers[i] = model.User{
-			Id:       "0",
-			Username: "0",
-			Password: "0",
-		}
 	}
 	tests := []struct {
 		name          string
 		username      string
 		expectedUser  *model.User
-		scanOutput    *dynamodb.ScanOutput
+		queryOutput   *dynamodb.QueryOutput
 		returnedError error
 		expectError   bool
 	}{
 		{
-			name:          "Successfully retrieve users",
-			username:      "0",
-			expectedUser:  &mockUsers[0],
-			scanOutput:    &dynamodb.ScanOutput{Items: userItems[:1]},
+			name:     "Successfully retrieve users",
+			username: "0",
+			expectedUser: &model.User{
+				Id:       "0",
+				Username: "0",
+				Password: "0",
+			},
+			queryOutput:   &dynamodb.QueryOutput{Items: userItems[:1]},
 			returnedError: nil,
 			expectError:   false,
 		},
@@ -114,7 +113,7 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 			name:          "No existing user",
 			username:      "0",
 			expectedUser:  nil,
-			scanOutput:    &dynamodb.ScanOutput{Items: nil},
+			queryOutput:   &dynamodb.QueryOutput{Items: nil},
 			returnedError: nil,
 			expectError:   false,
 		},
@@ -122,7 +121,7 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 			name:          "Too many users",
 			username:      "0",
 			expectedUser:  nil,
-			scanOutput:    &dynamodb.ScanOutput{Items: userItems},
+			queryOutput:   &dynamodb.QueryOutput{Items: userItems},
 			returnedError: nil,
 			expectError:   true,
 		},
@@ -130,16 +129,11 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
-			mockDdbClient.On("Scan", context.TODO(), mock.AnythingOfType("*dynamodb.ScanInput")).Return(tt.scanOutput, tt.returnedError)
+			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.queryOutput, tt.returnedError)
 			userStore := store.UserStoreDDB{DynamodbClient: mockDdbClient}
-			got, err := userStore.FindUserByUsername(tt.username)
-			if (err != nil) != tt.expectError {
-				t.Errorf("UserStoreDDB.FindUserByUsername() error = %v", err)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.expectedUser) {
-				t.Errorf("UserStoreDDB.FindUserByUsername() = %v, want %v", got, tt.expectedUser)
-			}
+			actualUser, err := userStore.FindUserByUsername(tt.username)
+			assert.Equal(t, tt.expectError, err != nil, "UserStoreDDB.FindUserByUsername() error = %v", err)
+			assert.Equal(t, tt.expectedUser, actualUser, "UserStoreDDB.FindUserByUsername() = %v, want %v", actualUser, tt.expectedUser)
 		})
 	}
 }

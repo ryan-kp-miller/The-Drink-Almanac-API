@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -78,54 +79,50 @@ func TestFavoriteStoreDDB_FindFavoritesByUser(t *testing.T) {
 	favoriteItems := make([]map[string]types.AttributeValue, numFavorites)
 	mockFavorites := make([]model.Favorite, numFavorites)
 	for i := 0; i < numFavorites; i++ {
+		iStr := strconv.Itoa(i)
 		favoriteItems[i] = map[string]types.AttributeValue{
-			"id":       &types.AttributeValueMemberS{Value: "0"},
+			"id":       &types.AttributeValueMemberS{Value: iStr},
 			"user_id":  &types.AttributeValueMemberS{Value: "0"},
-			"drink_id": &types.AttributeValueMemberS{Value: "0"},
+			"drink_id": &types.AttributeValueMemberS{Value: iStr},
 		}
 		mockFavorites[i] = model.Favorite{
-			Id:      "0",
-			DrinkId: "0",
+			Id:      iStr,
 			UserId:  "0",
+			DrinkId: iStr,
 		}
 	}
 	tests := []struct {
-		name             string
-		userId           string
-		expectedFavorite []model.Favorite
-		scanOutput       *dynamodb.ScanOutput
-		returnedError    error
-		expectError      bool
+		name              string
+		userId            string
+		expectedFavorites []model.Favorite
+		scanOutput        *dynamodb.QueryOutput
+		returnedError     error
+		expectError       bool
 	}{
 		{
-			name:             "Successfully retrieve favorites",
-			userId:           "0",
-			expectedFavorite: mockFavorites,
-			scanOutput:       &dynamodb.ScanOutput{Items: favoriteItems},
-			returnedError:    nil,
-			expectError:      false,
+			name:              "Successfully retrieve favorites",
+			userId:            "0",
+			expectedFavorites: mockFavorites,
+			scanOutput:        &dynamodb.QueryOutput{Items: favoriteItems},
+			returnedError:     nil,
+			expectError:       false,
 		},
 		{
-			name:             "Failed to retrieve favorites",
-			userId:           "0",
-			expectedFavorite: nil,
-			returnedError:    fmt.Errorf("failed to retrieve favorites"),
-			expectError:      true,
+			name:              "Failed to retrieve favorites",
+			userId:            "0",
+			expectedFavorites: nil,
+			returnedError:     fmt.Errorf("failed to retrieve favorites"),
+			expectError:       true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
-			mockDdbClient.On("Scan", context.TODO(), mock.AnythingOfType("*dynamodb.ScanInput")).Return(tt.scanOutput, tt.returnedError)
+			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.scanOutput, tt.returnedError)
 			favoriteStore := store.FavoriteStoreDDB{DynamodbClient: mockDdbClient}
-			got, err := favoriteStore.FindFavoritesByUser(tt.userId)
-			if (err != nil) != tt.expectError {
-				t.Errorf("FavoriteStoreDDB.FindFavoritesByUser() error = %v", err)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.expectedFavorite) {
-				t.Errorf("FavoriteStoreDDB.FindFavoritesByUser() = %v, want %v", got, tt.expectedFavorite)
-			}
+			actualFavorites, err := favoriteStore.FindFavoritesByUser(tt.userId)
+			assert.Equal(t, tt.expectError, err != nil, "FavoriteStoreDDB.FindFavoritesByUser() error = %v", err)
+			assert.Equal(t, tt.expectedFavorites, actualFavorites, "FavoriteStoreDDB.FindFavoritesByUser() = %v, want %v", actualFavorites, tt.expectedFavorites)
 		})
 	}
 }

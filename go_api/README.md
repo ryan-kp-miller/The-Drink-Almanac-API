@@ -100,3 +100,4 @@ To stop the api, run the `make down` command.
 - [x] Set up Data Transfer Object types for request bodies and responses
 - [x] Move hardcoded table names and other env variables to an app config struct
 - [x] Move auth validation from handlers to a middleware
+- [x] Update stores to use query instead of scan where applicable

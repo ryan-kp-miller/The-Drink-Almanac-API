@@ -36,26 +36,28 @@ func (fsd *FavoriteStoreDDB) FindAll() ([]model.Favorite, error) {
 }
 
 func (fsd *FavoriteStoreDDB) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
-	filterExpression, err := expression.NewBuilder().WithFilter(
-		expression.Equal(expression.Name("user_id"), expression.Value(userId)),
+	filterExpression, err := expression.NewBuilder().WithKeyCondition(
+		expression.Key("user_id").Equal(expression.Value(userId)),
 	).Build()
 	if err != nil {
 		return nil, err
 	}
 
-	scanInput := dynamodb.ScanInput{
+	queryInput := dynamodb.QueryInput{
 		TableName:                 aws.String(fsd.TableName),
-		FilterExpression:          filterExpression.Filter(),
+		IndexName:                 aws.String("user-index"),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
+		KeyConditionExpression:    filterExpression.KeyCondition(),
 	}
+
 	ctx := context.TODO()
-	scanOutput, err := fsd.DynamodbClient.Scan(ctx, &scanInput)
+	queryOutput, err := fsd.DynamodbClient.Query(ctx, &queryInput)
 	if err != nil {
 		return nil, err
 	}
 	favorites := []model.Favorite{}
-	err = attributevalue.UnmarshalListOfMaps(scanOutput.Items, &favorites)
+	err = attributevalue.UnmarshalListOfMaps(queryOutput.Items, &favorites)
 	if err != nil {
 		return nil, err
 	}
