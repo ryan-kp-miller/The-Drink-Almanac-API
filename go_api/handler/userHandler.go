@@ -17,29 +17,18 @@ type UserHandler struct {
 	authService service.AuthService
 }
 
-func (uh *UserHandler) FindAllUsers(c *gin.Context) {
-	users, err := uh.userService.FindAllUsers()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-	usersResponse := dto.NewUsersResponse(users)
-	c.JSON(http.StatusOK, usersResponse)
-}
-
 func (uh *UserHandler) FindUser(c *gin.Context) {
 	userId := c.GetString("userId")
 	if userId == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "token was not successfully retrieved"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "token was not successfully retrieved"})
+		return
 	}
 
 	user, err := uh.userService.FindUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {
-			statusCode = http.StatusForbidden
+			statusCode = http.StatusUnauthorized
 		}
 		c.JSON(statusCode, gin.H{"message": err.Error()})
 		return

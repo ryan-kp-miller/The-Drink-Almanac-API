@@ -17,49 +17,48 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFindAllUsers(t *testing.T) {
+func TestFindUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	mockUsers := []model.User{
-		{
-			Id:       "0",
-			Username: "0",
-			Password: "0",
-		},
-		{
-			Id:       "1",
-			Username: "1",
-			Password: "0",
-		},
-		{
-			Id:       "2",
-			Username: "1",
-			Password: "1",
-		},
-	}
 	data := []struct {
 		testName           string
-		returnedUsers      []model.User
+		userId             string
+		returnedUser       *model.User
 		returnedError      error
 		expectedStatusCode int
 	}{
 		{
-			testName:           "Successfully retrieve users",
-			returnedUsers:      mockUsers,
+			testName: "Successfully retrieve user",
+			userId:   "0",
+			returnedUser: &model.User{
+				Id:       "0",
+				Username: "0",
+				Password: "0",
+			},
 			returnedError:      nil,
 			expectedStatusCode: http.StatusOK,
 		},
 		{
-			testName:           "Failed to retrieve users",
-			returnedUsers:      nil,
-			returnedError:      fmt.Errorf("failed to retrieve users"),
-			expectedStatusCode: http.StatusInternalServerError,
+			testName:           "Failed to retrieve user",
+			userId:             "0",
+			returnedUser:       nil,
+			returnedError:      nil,
+			expectedStatusCode: http.StatusNotFound,
+		},
+		{
+			testName:           "No user id in context",
+			userId:             "",
+			returnedUser:       nil,
+			returnedError:      nil,
+			expectedStatusCode: http.StatusUnauthorized,
 		},
 	}
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockUserService := mocks.NewUserService(t)
-			mockUserService.On("FindAllUsers").Return(d.returnedUsers, d.returnedError)
+			if d.userId != "" {
+				mockUserService.On("FindUser", d.userId).Return(d.returnedUser, d.returnedError)
+			}
 			mockAuthService := mocks.NewAuthService(t)
 			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
 
@@ -68,14 +67,14 @@ func TestFindAllUsers(t *testing.T) {
 			assert.NoError(t, err)
 
 			router := gin.Default()
-			router.GET("/user", userHandler.FindAllUsers)
+			router.GET("/user", setUserIdInContext(d.userId), userHandler.FindUser)
 			router.ServeHTTP(rr, request)
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockUserService.AssertExpectations(t)
 
-			if d.returnedUsers != nil {
-				usersResponse := dto.NewUsersResponse(d.returnedUsers)
+			if d.returnedUser != nil {
+				usersResponse := dto.NewUserResponse(*d.returnedUser)
 				expectedResponseBody, err := json.Marshal(usersResponse)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
