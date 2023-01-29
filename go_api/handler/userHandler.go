@@ -20,17 +20,13 @@ type UserHandler struct {
 func (uh *UserHandler) FindUser(c *gin.Context) {
 	userId := c.GetString("userId")
 	if userId == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "token was not successfully retrieved"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "user id was not successfully retrieved from token"})
 		return
 	}
 
 	user, err := uh.userService.FindUser(userId)
 	if err != nil {
-		statusCode := http.StatusInternalServerError
-		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {
-			statusCode = http.StatusUnauthorized
-		}
-		c.JSON(statusCode, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 	if user == nil {
@@ -84,7 +80,8 @@ func (uh *UserHandler) CreateNewUser(c *gin.Context) {
 func (uh *UserHandler) DeleteUser(c *gin.Context) {
 	userId := c.GetString("userId")
 	if userId == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "token was not successfully retrieved"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "user id was not successfully retrieved from token"})
+		return
 	}
 
 	err := uh.userService.DeleteUser(userId)
@@ -146,7 +143,7 @@ func (uh *UserHandler) Login(c *gin.Context) {
 	}
 
 	c.Header("Token", tokenString)
-	c.Status(http.StatusAccepted)
+	c.Status(http.StatusOK)
 }
 
 func NewUserHandler(userService service.UserService, authService service.AuthService) UserHandler {

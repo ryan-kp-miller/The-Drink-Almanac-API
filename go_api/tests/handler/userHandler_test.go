@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestFindUser(t *testing.T) {
@@ -235,13 +236,22 @@ func TestDeleteUser(t *testing.T) {
 			expectedStatusCode: http.StatusNoContent,
 			authError:          nil,
 		},
+		{
+			testName:           "User id not retrieved",
+			userId:             "",
+			returnedError:      nil,
+			expectedStatusCode: http.StatusUnauthorized,
+			authError:          nil,
+		},
 	}
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockUserService := mocks.NewUserService(t)
 			mockAuthService := mocks.NewAuthService(t)
-			mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
+			if d.userId != "" {
+				mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
+			}
 			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
@@ -253,6 +263,131 @@ func TestDeleteUser(t *testing.T) {
 			router.ServeHTTP(rr, request)
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
+			mockUserService.AssertExpectations(t)
+		})
+	}
+}
+
+func TestLogin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	mockUser := &model.User{
+		Id:       "0",
+		Username: "0",
+		Password: "0",
+	}
+	data := []struct {
+		testName             string
+		username             string
+		password             string
+		requestBody          []byte
+		returnedUser         *model.User
+		returnedError        error
+		expectedStatusCode   int
+		shouldMethodBeCalled bool
+		shouldReturnToken    bool
+	}{
+		{
+			testName:             "Successfully logged in",
+			username:             "0",
+			password:             "0",
+			requestBody:          []byte(`{"username": "0", "password": "0"}`),
+			returnedUser:         mockUser,
+			returnedError:        nil,
+			expectedStatusCode:   http.StatusOK,
+			shouldMethodBeCalled: true,
+			shouldReturnToken:    true,
+		},
+		{
+			testName:             "Failed to log in",
+			username:             "0",
+			password:             "0",
+			requestBody:          []byte(`{"username": "0", "password": "0"}`),
+			returnedUser:         nil,
+			returnedError:        fmt.Errorf("failed to log in"),
+			expectedStatusCode:   http.StatusInternalServerError,
+			shouldMethodBeCalled: true,
+			shouldReturnToken:    false,
+		},
+		{
+			testName:             "No request body",
+			username:             "",
+			password:             "",
+			requestBody:          nil,
+			returnedUser:         nil,
+			returnedError:        fmt.Errorf("failed to log in"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+			shouldReturnToken:    false,
+		},
+		{
+			testName:             "username not provided",
+			username:             "",
+			password:             "0",
+			requestBody:          []byte(`{"password": "0"}`),
+			returnedUser:         nil,
+			returnedError:        fmt.Errorf("username not provided"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+			shouldReturnToken:    false,
+		},
+		{
+			testName:             "password not provided",
+			username:             "0",
+			password:             "",
+			requestBody:          []byte(`{"username": "0"}`),
+			returnedUser:         nil,
+			returnedError:        fmt.Errorf("password not provided"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+			shouldReturnToken:    false,
+		},
+		{
+			testName:             "Non-string username provided",
+			username:             "0",
+			password:             "0",
+			requestBody:          []byte(`{"username": 0, "password": "0"}`),
+			returnedUser:         nil,
+			returnedError:        fmt.Errorf("username is not a string"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+			shouldReturnToken:    false,
+		},
+		{
+			testName:             "Non-string password provided",
+			username:             "0",
+			password:             "0",
+			requestBody:          []byte(`{"username": "0", "password": 0}`),
+			returnedUser:         nil,
+			returnedError:        fmt.Errorf("password is not a string"),
+			expectedStatusCode:   http.StatusBadRequest,
+			shouldMethodBeCalled: false,
+			shouldReturnToken:    false,
+		},
+	}
+
+	for _, d := range data {
+		t.Run(d.testName, func(t *testing.T) {
+			mockUserService := mocks.NewUserService(t)
+			if d.shouldMethodBeCalled {
+				mockUserService.On("Login", d.username, d.password).Return(d.returnedUser, d.returnedError)
+			}
+			mockAuthService := mocks.NewAuthService(t)
+			if d.shouldReturnToken {
+				mockAuthService.On("CreateNewToken", d.returnedUser.Id, mock.Anything).Return("testToken", nil)
+			}
+			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
+
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodPost, "/user/login", bytes.NewBuffer(d.requestBody))
+			assert.NoError(t, err)
+
+			router := gin.Default()
+			router.POST("/user/login", userHandler.Login)
+			router.ServeHTTP(rr, request)
+
+			assert.Equal(t, d.expectedStatusCode, rr.Code)
+			_, ok := rr.HeaderMap["Token"]
+			assert.Equal(t, d.shouldReturnToken, ok)
 			mockUserService.AssertExpectations(t)
 		})
 	}
