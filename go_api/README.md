@@ -33,17 +33,27 @@ To stop the api, run the `make down` command.
 
 ## Endpoints
 
-- `/user` (will be changed to use access tokens)
-- `/user/login` (not implemented yet)
-- `/user/register` (not implemented yet)
+- `/user`
+  - HTTP Commands Allowed:
+    - `GET`: get user info using JWT
+      - JWT must be stored in `Token` header
+    - `POST`: create a new user
+    - `DELETE`: delete user account
+      - JWT must be stored in `Token` header
+- `/user/login`
+  - HTTP Commands Allowed:
+    - `POST`: log in to user's account
+      - JWT is returned in `Token` header
 - `/favorite`
   - HTTP Commands Allowed:
     - `GET`: get all favorites for a user
-      - User id provided in the url (will be changed to use access tokens)
+      - User id is retrieved from JWT in the `Token` header
     - `POST`: create a new favorite for a given user and drink
-      - user id and drink id provided in the request body
+      - Drink id should be provided in the request body
+      - User id is retrieved from JWT in the `Token` header
     - `DELETE`: delete a favorite
-      - favorite id provided in the url
+      - Favorite id provided in the url
+      - JWT must be stored in `Token` header
 
 
 ## To Do
