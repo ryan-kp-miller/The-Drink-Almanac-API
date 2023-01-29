@@ -138,6 +138,72 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 	}
 }
 
+func TestUserStoreDDB_FindUserById(t *testing.T) {
+	numUsers := 5
+	userItems := make([]map[string]types.AttributeValue, numUsers)
+	for i := 0; i < numUsers; i++ {
+		userItems[i] = map[string]types.AttributeValue{
+			"id":       &types.AttributeValueMemberS{Value: "0"},
+			"username": &types.AttributeValueMemberS{Value: "0"},
+			"password": &types.AttributeValueMemberS{Value: "0"},
+		}
+	}
+	tests := []struct {
+		name          string
+		username      string
+		expectedUser  *model.User
+		queryOutput   *dynamodb.QueryOutput
+		returnedError error
+		expectError   bool
+	}{
+		{
+			name:     "Successfully retrieve users",
+			username: "0",
+			expectedUser: &model.User{
+				Id:       "0",
+				Username: "0",
+				Password: "0",
+			},
+			queryOutput:   &dynamodb.QueryOutput{Items: userItems[:1]},
+			returnedError: nil,
+			expectError:   false,
+		},
+		{
+			name:          "Failed to retrieve users",
+			username:      "0",
+			expectedUser:  nil,
+			returnedError: fmt.Errorf("failed to retrieve users"),
+			expectError:   true,
+		},
+		{
+			name:          "No existing user",
+			username:      "0",
+			expectedUser:  nil,
+			queryOutput:   &dynamodb.QueryOutput{Items: nil},
+			returnedError: nil,
+			expectError:   false,
+		},
+		{
+			name:          "Too many users",
+			username:      "0",
+			expectedUser:  nil,
+			queryOutput:   &dynamodb.QueryOutput{Items: userItems},
+			returnedError: nil,
+			expectError:   true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.queryOutput, tt.returnedError)
+			userStore := store.UserStoreDDB{DynamodbClient: mockDdbClient}
+			actualUser, err := userStore.FindUserById(tt.username)
+			assert.Equal(t, tt.expectError, err != nil, "UserStoreDDB.FindUserById() error = %v", err)
+			assert.Equal(t, tt.expectedUser, actualUser, "UserStoreDDB.FindUserById() = %v, want %v", actualUser, tt.expectedUser)
+		})
+	}
+}
+
 func TestUserStoreDDB_CreateNewUser(t *testing.T) {
 	mockUser := model.User{
 		Id:       "0",
