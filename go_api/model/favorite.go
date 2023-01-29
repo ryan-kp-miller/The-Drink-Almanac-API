@@ -1,9 +1,9 @@
 package model
 
 type Favorite struct {
-	Id      string `json:"id" dynamodbav:"id"`
-	UserId  string `json:"userId" dynamodbav:"user_id"`
-	DrinkId string `json:"drinkId" dynamodbav:"drink_id"`
+	Id      string `dynamodbav:"id"`
+	UserId  string `dynamodbav:"user_id"`
+	DrinkId string `dynamodbav:"drink_id"`
 }
 
 type FavoriteStore interface {

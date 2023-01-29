@@ -30,16 +30,11 @@ func (uh *UserHandler) FindAllUsers(c *gin.Context) {
 }
 
 func (uh *UserHandler) FindUser(c *gin.Context) {
-	tokens := c.Request.Header["Token"]
-	if len(tokens) == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
-		return
+	userId := c.GetString("userId")
+	if userId == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "token was not successfully retrieved"})
 	}
-	userId, err := uh.authService.ValidateToken(tokens[0])
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was invalid"})
-		return
-	}
+
 	user, err := uh.userService.FindUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
@@ -49,6 +44,11 @@ func (uh *UserHandler) FindUser(c *gin.Context) {
 		c.JSON(statusCode, gin.H{"message": err.Error()})
 		return
 	}
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("no user was found with the userId '%s'", userId)})
+		return
+	}
+
 	userResponse := dto.NewUserResponse(*user)
 	c.JSON(http.StatusOK, userResponse)
 }
@@ -93,18 +93,12 @@ func (uh *UserHandler) CreateNewUser(c *gin.Context) {
 }
 
 func (uh *UserHandler) DeleteUser(c *gin.Context) {
-	tokens := c.Request.Header["Token"]
-	if len(tokens) == 0 {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was not included in the request"})
-		return
-	}
-	userId, err := uh.authService.ValidateToken(tokens[0])
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "the 'Token' header was invalid"})
-		return
+	userId := c.GetString("userId")
+	if userId == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "token was not successfully retrieved"})
 	}
 
-	err = uh.userService.DeleteUser(userId)
+	err := uh.userService.DeleteUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if errors.As(err, &appErrors.InvalidAuthTokenError{}) {

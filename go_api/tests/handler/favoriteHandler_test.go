@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 	"the-drink-almanac-api/appErrors"
+	"the-drink-almanac-api/dto"
 	"the-drink-almanac-api/handler"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
@@ -59,7 +60,7 @@ func TestFindAllFavorites(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("FindAllFavorites").Return(d.returnedFavorites, d.returnedError)
-			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/favorite", nil)
@@ -73,7 +74,8 @@ func TestFindAllFavorites(t *testing.T) {
 			mockFavoriteService.AssertExpectations(t)
 
 			if d.returnedFavorites != nil {
-				expectedResponseBody, err := json.Marshal(d.returnedFavorites)
+				favoritesResponse := dto.NewFavoritesResponse(d.returnedFavorites)
+				expectedResponseBody, err := json.Marshal(favoritesResponse)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
 			}
@@ -129,21 +131,24 @@ func TestFindFavoritesByUser(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("FindFavoritesByUser", d.userId).Return(d.returnedFavorites, d.returnedError)
-			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/favorite/%s", d.userId), nil)
+			request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/favorite"), nil)
 			assert.NoError(t, err)
 
+			gin.SetMode(gin.TestMode)
 			router := gin.Default()
-			router.GET("/favorite/:userId", favoriteHandler.FindFavoritesByUser)
+
+			router.GET("/favorite", setUserIdInContext(d.userId), favoriteHandler.FindFavoritesByUser)
 			router.ServeHTTP(rr, request)
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockFavoriteService.AssertExpectations(t)
 
 			if d.returnedFavorites != nil && len(d.returnedFavorites) != 0 {
-				expectedResponseBody, err := json.Marshal(d.returnedFavorites)
+				favoritesResponse := dto.NewFavoritesResponse(d.returnedFavorites)
+				expectedResponseBody, err := json.Marshal(favoritesResponse)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
 			}
@@ -209,32 +214,12 @@ func TestCreateNewFavorite(t *testing.T) {
 			shouldMethodBeCalled: false,
 		},
 		{
-			testName:             "User id not provided",
-			userId:               "",
-			drinkId:              "0",
-			requestBody:          []byte(`{"drink_id": "0"}`),
-			returnedFavorite:     nil,
-			returnedError:        fmt.Errorf("user id not provided"),
-			expectedStatusCode:   http.StatusBadRequest,
-			shouldMethodBeCalled: false,
-		},
-		{
 			testName:             "Drink id not provided",
 			userId:               "0",
 			drinkId:              "",
 			requestBody:          []byte(`{"user_id": "0"}`),
 			returnedFavorite:     nil,
 			returnedError:        fmt.Errorf("drink id not provided"),
-			expectedStatusCode:   http.StatusBadRequest,
-			shouldMethodBeCalled: false,
-		},
-		{
-			testName:             "Non-string user id provided",
-			userId:               "0",
-			drinkId:              "0",
-			requestBody:          []byte(`{"user_id": 0, "drink_id": "0"}`),
-			returnedFavorite:     nil,
-			returnedError:        fmt.Errorf("user id is not a string"),
 			expectedStatusCode:   http.StatusBadRequest,
 			shouldMethodBeCalled: false,
 		},
@@ -254,23 +239,24 @@ func TestCreateNewFavorite(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			if d.shouldMethodBeCalled {
-				mockFavoriteService.On("CreateNewFavorite", d.userId, d.drinkId).Return(d.returnedFavorite, d.returnedError)
+				mockFavoriteService.On("CreateNewFavorite", d.drinkId, d.userId).Return(d.returnedFavorite, d.returnedError)
 			}
-			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodPost, "/favorite", bytes.NewBuffer(d.requestBody))
 			assert.NoError(t, err)
 
 			router := gin.Default()
-			router.POST("/favorite", favoriteHandler.CreateNewFavorite)
+			router.POST("/favorite", setUserIdInContext(d.userId), favoriteHandler.CreateNewFavorite)
 			router.ServeHTTP(rr, request)
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)
 			mockFavoriteService.AssertExpectations(t)
 
 			if d.returnedFavorite != nil && d.returnedError == nil {
-				expectedResponseBody, err := json.Marshal(d.returnedFavorite)
+				favoriteResponse := dto.NewFavoriteResponse(*d.returnedFavorite)
+				expectedResponseBody, err := json.Marshal(favoriteResponse)
 				assert.NoError(t, err)
 				assert.Equal(t, expectedResponseBody, rr.Body.Bytes())
 			}
@@ -310,7 +296,7 @@ func TestDeleteFavorite(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("DeleteFavorite", d.favoriteId).Return(d.returnedError)
-			favoriteHandler := handler.FavoriteHandlers{Service: mockFavoriteService}
+			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/favorite/%s", d.favoriteId), nil)

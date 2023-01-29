@@ -236,32 +236,21 @@ func TestDeleteUser(t *testing.T) {
 			expectedStatusCode: http.StatusNoContent,
 			authError:          nil,
 		},
-		{
-			testName:           "Not authorized",
-			userId:             "0",
-			returnedError:      nil,
-			expectedStatusCode: http.StatusUnauthorized,
-			authError:          fmt.Errorf("tsk tsk"),
-		},
 	}
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
 			mockUserService := mocks.NewUserService(t)
 			mockAuthService := mocks.NewAuthService(t)
-			mockAuthService.On("ValidateToken", "testToken").Return(d.userId, d.authError)
-			if d.authError == nil {
-				mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
-			}
+			mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
 			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodDelete, "/user", nil)
-			request.Header["Token"] = []string{"testToken"}
 			assert.NoError(t, err)
 
 			router := gin.Default()
-			router.DELETE("/user", userHandler.DeleteUser)
+			router.DELETE("/user", setUserIdInContext(d.userId), userHandler.DeleteUser)
 			router.ServeHTTP(rr, request)
 
 			assert.Equal(t, d.expectedStatusCode, rr.Code)

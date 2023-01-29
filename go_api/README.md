@@ -55,22 +55,16 @@ To stop the api, run the `make down` command.
   - [ ] Update delete user method to also delete any favorites associated with that user
     - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
     - [ ] Add favorite store field to UserService
-  - [ ] Update existing endpoints to use user authorization (access tokens)
-    - [ ] GET /favorite (remove endpoint for retrieving all favorites for all users)
-    - [ ] POST /favorite
-    - [ ] DELETE /favorite
   - [ ] Add endpoint for retrieving drink data
 - [ ] More tests for new code
   - [ ] `UserService.Login`
   - [ ] `UserHandlers.Login`
 - [ ] Add better logging
 - [ ] Swagger docs
-- [ ] Deploy API
-  - Terraform?
-- [ ] Set up CI/CD for automatically deploying changes
+- [ ] Deploy API using Terraform
+  - [ ] Set up CI/CD for automatically deploying changes
 - [ ] Add code coverage badge to repo's README
 - [ ] Update frontend to use new drink endpoint
-- [ ] Move auth validation from handlers to a middleware
 - [ ] Add `create_ts` for users and favorites
 
 
@@ -85,9 +79,12 @@ To stop the api, run the `make down` command.
   - [x] Fix create favorite post method to actually check if drink or user ids are empty
   - [x] Add method to delete user 
   - [x] User authentication
-  - [ ] Update existing endpoints to use user authorization (access tokens)
+  - [x] Update existing endpoints to use user authorization (access tokens)
     - [x] DELETE /user
     - [x] GET /user
+    - [x] GET /favorite (remove endpoint for retrieving all favorites for all users)
+    - [x] POST /favorite
+    - [x] DELETE /favorite
 - [x] Write unit tests (80% or higher coverage)
   - [x] Favorites
     - [x] dto
@@ -102,3 +99,4 @@ To stop the api, run the `make down` command.
   - [x] Add tests to CICD pipeline
 - [x] Set up Data Transfer Object types for request bodies and responses
 - [x] Move hardcoded table names and other env variables to an app config struct
+- [x] Move auth validation from handlers to a middleware

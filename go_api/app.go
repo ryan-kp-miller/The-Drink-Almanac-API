@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"the-drink-almanac-api/handler"
+	"the-drink-almanac-api/middleware"
 	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
 	"the-drink-almanac-api/store"
@@ -18,24 +19,27 @@ func Start(port string) {
 	// set up default endpoint
 	router.GET("", hello_world_handler)
 
+	// set up auth middleware
+	authService := service.NewJwtAuthService(appConfig.JwtSecretKey)
+	authMiddleware := middleware.NewAuthMiddleware(authService)
+
 	// set up favorite endpoints
 	favoriteStore, _ := store.NewFavoriteStoreDDB(appConfig.FavoritesTableName, appConfig.AwsEndpoint)
 	favoriteService := service.NewDefaultFavoriteService(favoriteStore)
-	favoriteHandlers := handler.FavoriteHandlers{Service: favoriteService}
+	favoriteHandler := handler.FavoriteHandler{Service: favoriteService}
 	favoriteRouteGroup := router.Group("/favorite")
-	favoriteRouteGroup.GET("", favoriteHandlers.FindFavoritesByUser)
-	favoriteRouteGroup.POST("", favoriteHandlers.CreateNewFavorite)
-	favoriteRouteGroup.DELETE("/:favoriteId", favoriteHandlers.DeleteFavorite)
+	favoriteRouteGroup.GET("", authMiddleware.AuthUser, favoriteHandler.FindFavoritesByUser)
+	favoriteRouteGroup.POST("", authMiddleware.AuthUser, favoriteHandler.CreateNewFavorite)
+	favoriteRouteGroup.DELETE("/:favoriteId", authMiddleware.AuthUser, favoriteHandler.DeleteFavorite)
 
 	// set up user endpoints
 	userStore, _ := store.NewUserStoreDDB(appConfig.UsersTableName, appConfig.AwsEndpoint)
 	userService := service.NewDefaultUserService(userStore)
-	authService := service.NewJwtAuthService(appConfig.JwtSecretKey)
 	userHandler := handler.NewUserHandler(userService, authService)
 	userRouteGroup := router.Group("/user")
-	userRouteGroup.GET("", userHandler.FindUser)
+	userRouteGroup.GET("", authMiddleware.AuthUser, userHandler.FindUser)
 	userRouteGroup.POST("", userHandler.CreateNewUser)
-	userRouteGroup.DELETE("", userHandler.DeleteUser)
+	userRouteGroup.DELETE("", authMiddleware.AuthUser, userHandler.DeleteUser)
 	userRouteGroup.POST("/login", userHandler.Login)
 
 	// running the app

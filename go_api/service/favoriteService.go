@@ -10,8 +10,14 @@ import (
 
 type FavoriteService interface {
 	FindAllFavorites() ([]model.Favorite, error)
+
+	// FindFavoritesByUser retrieves favorites based on the user's id
 	FindFavoritesByUser(userId string) ([]model.Favorite, error)
+
+	// CreateNewFavorite either creates a new favorite if one doesn't exist with the given drinkId and userId
+	// or returns the existing favorite and the FavoriteAlreadyExistsError
 	CreateNewFavorite(userId, drinkId string) (*model.Favorite, error)
+
 	DeleteFavorite(id string) error
 }
 
@@ -23,13 +29,10 @@ func (s DefaultFavoriteService) FindAllFavorites() ([]model.Favorite, error) {
 	return s.store.FindAll()
 }
 
-// FindFavoritesByUser retrieves favorites based on the user's id
 func (s DefaultFavoriteService) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
 	return s.store.FindFavoritesByUser(userId)
 }
 
-// CreateNewFavorite either creates a new favorite if one doesn't exist with the given drinkId and userId
-// or returns the existing favorite and the FavoriteAlreadyExistsError
 func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*model.Favorite, error) {
 	if drinkId == "" {
 		return nil, fmt.Errorf("the drinkId must not be empty")

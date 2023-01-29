@@ -1,7 +1,7 @@
 package model
 
 type User struct {
-	Id       string `json:"id" dynamodbav:"id"`
-	Username string `json:"username" dynamodbav:"username"`
-	Password string `json:"password" dynamodbav:"password"`
+	Id       string `dynamodbav:"id"`
+	Username string `dynamodbav:"username"`
+	Password string `dynamodbav:"password"`
 }
