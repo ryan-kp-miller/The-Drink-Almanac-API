@@ -90,7 +90,6 @@ func (s DefaultUserService) Login(username, password string) (*model.User, error
 		return nil, fmt.Errorf("the password must not be empty")
 	}
 
-	// ensure that we aren't creating a duplicate user by check for an existing record with the same username
 	user, err := s.store.FindUserByUsername(username)
 	if err != nil {
 		return nil, err

@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"testing"
+	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
@@ -209,6 +210,95 @@ func TestDefaultUserService_DeleteUser(t *testing.T) {
 				assert.NotNil(t, err, "An error should have been returned from userService.DeleteUser")
 			} else {
 				assert.Nil(t, err, "No error should have been returned from userService.DeleteUser")
+			}
+			mockUserStore.AssertExpectations(t)
+		})
+	}
+}
+
+func TestDefaultUserService_Login(t *testing.T) {
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("0"), 8)
+	mockUser := &model.User{
+		Id:       "0",
+		Username: "0",
+		Password: string(hashedPassword),
+	}
+	tests := []struct {
+		name                            string
+		username                        string
+		password                        string
+		isStoreFindUserByUsernameCalled bool
+		FindUserByUsernameError         error
+		existingUser                    *model.User
+		expectedError                   error
+	}{
+		{
+			name:                            "Successfully logged in",
+			username:                        "0",
+			password:                        "0",
+			isStoreFindUserByUsernameCalled: true,
+			FindUserByUsernameError:         nil,
+			existingUser:                    mockUser,
+			expectedError:                   nil,
+		},
+		{
+			name:                            "Failed to log in",
+			username:                        "0",
+			password:                        "0",
+			isStoreFindUserByUsernameCalled: true,
+			FindUserByUsernameError:         fmt.Errorf("failed to log in"),
+			existingUser:                    nil,
+			expectedError:                   fmt.Errorf("failed to log in"),
+		},
+		{
+			name:                            "User not found",
+			username:                        "0",
+			password:                        "0",
+			isStoreFindUserByUsernameCalled: true,
+			FindUserByUsernameError:         nil,
+			existingUser:                    nil,
+			expectedError:                   appErrors.NewUserNotFoundError("0"),
+		},
+		{
+			name:                            "Username is empty",
+			username:                        "",
+			password:                        "0",
+			isStoreFindUserByUsernameCalled: false,
+			FindUserByUsernameError:         nil,
+			existingUser:                    nil,
+			expectedError:                   fmt.Errorf("the username must not be empty"),
+		},
+		{
+			name:                            "Password is empty",
+			username:                        "0",
+			password:                        "",
+			isStoreFindUserByUsernameCalled: false,
+			FindUserByUsernameError:         nil,
+			existingUser:                    nil,
+			expectedError:                   fmt.Errorf("the password must not be empty"),
+		},
+		{
+			name:                            "Password doesn't match",
+			username:                        "0",
+			password:                        "badPassword",
+			isStoreFindUserByUsernameCalled: true,
+			FindUserByUsernameError:         nil,
+			existingUser:                    mockUser,
+			expectedError:                   appErrors.NewIncorrectPasswordError("0"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockUserStore := mocks.NewUserStore(t)
+			if tt.isStoreFindUserByUsernameCalled {
+				mockUserStore.On("FindUserByUsername", tt.username).Return(tt.existingUser, tt.FindUserByUsernameError)
+			}
+
+			userService := service.NewDefaultUserService(mockUserStore)
+			user, err := userService.Login(tt.username, tt.password)
+			assert.Equal(t, tt.expectedError, err)
+			if tt.expectedError == nil {
+				assert.Equal(t, user, tt.existingUser)
 			}
 			mockUserStore.AssertExpectations(t)
 		})
