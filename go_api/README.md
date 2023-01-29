@@ -66,15 +66,11 @@ To stop the api, run the `make down` command.
     - [ ] Add DeleteFavorites method that takes a slice of id strings and deletes those favorites
     - [ ] Add favorite store field to UserService
   - [ ] Add endpoint for retrieving drink data
-- [ ] More tests for new code
-  - [ ] `UserService.Login`
-  - [ ] `UserHandlers.Login`
 - [ ] Add better logging
 - [ ] Swagger docs
 - [ ] Deploy API using Terraform
   - [ ] Set up CI/CD for automatically deploying changes
 - [ ] Add code coverage badge to repo's README
-- [ ] Update frontend to use new drink endpoint
 - [ ] Add `create_ts` for users and favorites
 
 
@@ -111,3 +107,7 @@ To stop the api, run the `make down` command.
 - [x] Move hardcoded table names and other env variables to an app config struct
 - [x] Move auth validation from handlers to a middleware
 - [x] Update stores to use query instead of scan where applicable
+- [x] More tests for new code
+  - [x] `UserService.Login`
+  - [x] `UserHandlers.Login`
+  - [x] `AuthMiddleware.AuthUser`
