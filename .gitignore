@@ -18,3 +18,6 @@ venv
 # code coverage files
 coverage.txt
 coverage_raw.txt
+
+# intellij stuff
+.idea
