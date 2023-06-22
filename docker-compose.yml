@@ -8,8 +8,9 @@ services:
     environment:
       - DISABLE_CORS_CHECKS=1
       - SERVICES=dynamodb
-    volumes: 
+    volumes:
       - ./.config/localstack/init-scripts:/docker-entrypoint-initaws.d
+      - ./artifacts:/artifacts
         
   dynamodb-admin:
     container_name: dynamodb-admin

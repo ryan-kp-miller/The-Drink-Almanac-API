@@ -21,3 +21,6 @@ coverage_raw.txt
 
 # intellij stuff
 .idea
+
+# lambda artifacts
+artifacts

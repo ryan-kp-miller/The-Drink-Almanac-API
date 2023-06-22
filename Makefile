@@ -30,3 +30,16 @@ test:
 	docker build -t $(test_image_name) -f ./go_api/Dockerfile.test ./go_api
 	docker run -it --rm --name $(test_container_name) $(test_image_name)
 .PHONY:test
+
+package-lambdas:
+	bash scripts/package_favorites_lambda.sh
+.PHONY:package-lambdas
+
+publish-lambdas:
+	bash scripts/publish_favorites_lambda.sh
+.PHONY: publish-lambdas
+
+package-publish-lambdas:
+	make package-lambdas
+	make publish-lambdas
+.PHONY: package-publish-lambdas

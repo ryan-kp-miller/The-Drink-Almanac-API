@@ -60,6 +60,8 @@ To stop the api, run the `make down` command.
 
 ### Unfinished
 
+- [ ] Set up lambda handler to be used by each endpoint
+- [ ] Switch endpoints to lambdas
 - Create endpoints for:
   - [ ] Add new method to find a favorite by user and drink ids and update the favorite service to use that instead of getting all favorites and then filtering
   - [ ] Update delete user method to also delete any favorites associated with that user
@@ -67,6 +69,7 @@ To stop the api, run the `make down` command.
     - [ ] Add favorite store field to UserService
   - [ ] Add endpoint for retrieving drink data
 - [ ] Add better logging
+- [ ] Use API Gateway (separate repo?) for the endpoints
 - [ ] Swagger docs
 - [ ] Deploy API using Terraform
   - [ ] Set up CI/CD for automatically deploying changes
