@@ -9,7 +9,7 @@ import (
 	"testing"
 	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/handler"
+	"the-drink-almanac-api/handler/server"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
 
@@ -61,7 +61,7 @@ func TestFindUser(t *testing.T) {
 				mockUserService.On("FindUser", d.userId).Return(d.returnedUser, d.returnedError)
 			}
 			mockAuthService := mocks.NewAuthService(t)
-			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
+			userHandler := server.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/user", nil)
@@ -190,7 +190,7 @@ func TestCreateNewUser(t *testing.T) {
 				mockUserService.On("CreateNewUser", d.username, d.password).Return(d.returnedUser, d.returnedError)
 			}
 			mockAuthService := mocks.NewAuthService(t)
-			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
+			userHandler := server.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodPost, "/user", bytes.NewBuffer(d.requestBody))
@@ -252,7 +252,7 @@ func TestDeleteUser(t *testing.T) {
 			if d.userId != "" {
 				mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
 			}
-			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
+			userHandler := server.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodDelete, "/user", nil)
@@ -375,7 +375,7 @@ func TestLogin(t *testing.T) {
 			if d.shouldReturnToken {
 				mockAuthService.On("CreateNewToken", d.returnedUser.Id, mock.Anything).Return("testToken", nil)
 			}
-			userHandler := handler.NewUserHandler(mockUserService, mockAuthService)
+			userHandler := server.NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodPost, "/user/login", bytes.NewBuffer(d.requestBody))

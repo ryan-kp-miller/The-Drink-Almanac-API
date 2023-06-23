@@ -9,7 +9,7 @@ import (
 	"testing"
 	"the-drink-almanac-api/appErrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/handler"
+	"the-drink-almanac-api/handler/server"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
 
@@ -60,7 +60,7 @@ func TestFindAllFavorites(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("FindAllFavorites").Return(d.returnedFavorites, d.returnedError)
-			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
+			favoriteHandler := server.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/favorite", nil)
@@ -131,7 +131,7 @@ func TestFindFavoritesByUser(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("FindFavoritesByUser", d.userId).Return(d.returnedFavorites, d.returnedError)
-			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
+			favoriteHandler := server.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/favorite"), nil)
@@ -241,7 +241,7 @@ func TestCreateNewFavorite(t *testing.T) {
 			if d.shouldMethodBeCalled {
 				mockFavoriteService.On("CreateNewFavorite", d.drinkId, d.userId).Return(d.returnedFavorite, d.returnedError)
 			}
-			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
+			favoriteHandler := server.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodPost, "/favorite", bytes.NewBuffer(d.requestBody))
@@ -296,7 +296,7 @@ func TestDeleteFavorite(t *testing.T) {
 		t.Run(d.testName, func(t *testing.T) {
 			mockFavoriteService := mocks.NewFavoriteService(t)
 			mockFavoriteService.On("DeleteFavorite", d.favoriteId).Return(d.returnedError)
-			favoriteHandler := handler.FavoriteHandler{Service: mockFavoriteService}
+			favoriteHandler := server.FavoriteHandler{Service: mockFavoriteService}
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/favorite/%s", d.favoriteId), nil)

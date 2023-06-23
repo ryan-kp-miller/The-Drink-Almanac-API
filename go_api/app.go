@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"the-drink-almanac-api/handler"
+	"the-drink-almanac-api/handler/server"
 	"the-drink-almanac-api/middleware"
 	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
@@ -26,7 +26,7 @@ func Start(port string) {
 	// set up favorite endpoints
 	favoriteStore, _ := store.NewFavoriteStoreDDB(appConfig.FavoritesTableName, appConfig.AwsEndpoint)
 	favoriteService := service.NewDefaultFavoriteService(favoriteStore)
-	favoriteHandler := handler.FavoriteHandler{Service: favoriteService}
+	favoriteHandler := server.FavoriteHandler{Service: favoriteService}
 	favoriteRouteGroup := router.Group("/favorite")
 	favoriteRouteGroup.GET("", authMiddleware.AuthUser, favoriteHandler.FindFavoritesByUser)
 	favoriteRouteGroup.POST("", authMiddleware.AuthUser, favoriteHandler.CreateNewFavorite)
@@ -35,7 +35,7 @@ func Start(port string) {
 	// set up user endpoints
 	userStore, _ := store.NewUserStoreDDB(appConfig.UsersTableName, appConfig.AwsEndpoint)
 	userService := service.NewDefaultUserService(userStore)
-	userHandler := handler.NewUserHandler(userService, authService)
+	userHandler := server.NewUserHandler(userService, authService)
 	userRouteGroup := router.Group("/user")
 	userRouteGroup.GET("", authMiddleware.AuthUser, userHandler.FindUser)
 	userRouteGroup.POST("", userHandler.CreateNewUser)
