@@ -199,11 +199,3 @@ func (h *FavoritesLambdaHandler) RouteRequest(request events.APIGatewayV2HTTPReq
 		}, nil
 	}
 }
-
-func messageToResponseBody(message string) string {
-	m := map[string]string{
-		"message": message,
-	}
-	body, _ := jsoniter.MarshalToString(m)
-	return body
-}

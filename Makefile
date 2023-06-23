@@ -31,13 +31,31 @@ test:
 	docker run -it --rm --name $(test_container_name) $(test_image_name)
 .PHONY:test
 
+package-favorites-lambda:
+	bash scripts/package_lambda.sh "favorites"
+.PHONY:package-favorite-lambdas
+
+package-users-lambda:
+	bash scripts/package_lambda.sh "users"
+.PHONY:package-users-lambdas
+
 package-lambdas:
-	bash scripts/package_favorites_lambda.sh
+	make package-favorites-lambda
+	make package-users-lambda
 .PHONY:package-lambdas
 
+publish-favorites-lambda:
+	bash scripts/publish_lambda.sh "favorites"
+.PHONY: publish-favorites-lambda
+
+publish-users-lambda:
+	bash scripts/publish_lambda.sh "users"
+.PHONY: publish-users-lambda
+
 publish-lambdas:
-	bash scripts/publish_favorites_lambda.sh
-.PHONY: publish-lambdas
+	make publish-favorites-lambda
+	make publish-users-lambda
+.PHONY:publish-lambdas
 
 package-publish-lambdas:
 	make package-lambdas

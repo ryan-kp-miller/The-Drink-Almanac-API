@@ -2,6 +2,7 @@ package lambda
 
 import (
 	"errors"
+	jsoniter "github.com/json-iterator/go"
 	"the-drink-almanac-api/service"
 )
 
@@ -18,4 +19,12 @@ func authorizeUser(headers map[string]string, authService service.AuthService) (
 	}
 
 	return userId, nil
+}
+
+func messageToResponseBody(message string) string {
+	m := map[string]string{
+		"message": message,
+	}
+	body, _ := jsoniter.MarshalToString(m)
+	return body
 }

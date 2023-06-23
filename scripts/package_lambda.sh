@@ -1,7 +1,8 @@
 #!/bin/bash
 
-ROOT_PATH="./go_api/lambdas/favorites"
-APP_NAME="favorites-lambda"
+LAMBDA_PREFIX=$1
+ROOT_PATH="./go_api/lambdas/${LAMBDA_PREFIX}"
+APP_NAME="${LAMBDA_PREFIX}-lambda"
 ARTIFACT_NAME="${APP_NAME}"
 START_PATH=$(pwd)
 
