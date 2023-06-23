@@ -23,37 +23,49 @@ func NewFavoritesLambdaHandler(favoriteService service.FavoriteService, authServ
 	}
 }
 
-func (h *FavoritesLambdaHandler) FindAllFavorites(request events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+func (h *FavoritesLambdaHandler) FindAllFavorites(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	favorites, err := h.favoriteService.FindAllFavorites()
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 	favoritesResponse := dto.NewFavoritesResponse(favorites)
 	body, err := jsoniter.MarshalToString(favoritesResponse)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
-	response := events.APIGatewayProxyResponse{
+	response := events.APIGatewayV2HTTPResponse{
 		StatusCode: http.StatusOK,
 		Body:       body,
 	}
 	return response, nil
 }
 
-func (h *FavoritesLambdaHandler) FindFavoritesByUser(request events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+func (h *FavoritesLambdaHandler) FindFavoritesByUser(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	userId, err := authorizeUser(request.Headers, h.authService)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusForbidden,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
 	favorites, err := h.favoriteService.FindFavoritesByUser(userId)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
 	if len(favorites) == 0 {
-		response := events.APIGatewayProxyResponse{
+		response := events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusNotFound,
 			Body:       messageToResponseBody(fmt.Sprintf("no favorites were found for user with id %s", userId)),
 		}
@@ -63,25 +75,31 @@ func (h *FavoritesLambdaHandler) FindFavoritesByUser(request events.APIGatewayV2
 	favoritesResponse := dto.NewFavoritesResponse(favorites)
 	body, err := jsoniter.MarshalToString(favoritesResponse)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
-	response := events.APIGatewayProxyResponse{
+	response := events.APIGatewayV2HTTPResponse{
 		StatusCode: http.StatusOK,
 		Body:       body,
 	}
 	return response, nil
 }
 
-func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	userId, err := authorizeUser(request.Headers, h.authService)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusForbidden,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
 	var newFavoritePostRequest dto.FavoritePostRequest
 	if err := jsoniter.Unmarshal([]byte(request.Body), newFavoritePostRequest); err != nil {
-		response := events.APIGatewayProxyResponse{
+		response := events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       messageToResponseBody(err.Error()),
 		}
@@ -89,7 +107,7 @@ func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HT
 	}
 
 	if err := newFavoritePostRequest.ValidateRequest(); err != nil {
-		response := events.APIGatewayProxyResponse{
+		response := events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       messageToResponseBody(err.Error()),
 		}
@@ -99,13 +117,13 @@ func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HT
 	newFavorite, err := h.favoriteService.CreateNewFavorite(newFavoritePostRequest.DrinkId, userId)
 	if err != nil {
 		if errors.As(err, &appErrors.FavoriteAlreadyExistsError{}) {
-			response := events.APIGatewayProxyResponse{
+			response := events.APIGatewayV2HTTPResponse{
 				StatusCode: http.StatusConflict,
 				Body:       messageToResponseBody(fmt.Sprintf("the user '%s' already favorited the drink with id '%s'", newFavorite.UserId, newFavorite.DrinkId)),
 			}
 			return response, nil
 		}
-		response := events.APIGatewayProxyResponse{
+		response := events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       messageToResponseBody(fmt.Sprintf("unable to add the new favorite due to %s", err.Error())),
 		}
@@ -115,35 +133,44 @@ func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HT
 	favoriteResponse := dto.NewFavoriteResponse(*newFavorite)
 	body, err := jsoniter.MarshalToString(favoriteResponse)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
-	response := events.APIGatewayProxyResponse{
+	response := events.APIGatewayV2HTTPResponse{
 		StatusCode: http.StatusOK,
 		Body:       body,
 	}
 	return response, nil
 }
 
-func (h *FavoritesLambdaHandler) DeleteFavorite(request events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+func (h *FavoritesLambdaHandler) DeleteFavorite(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	_, err := authorizeUser(request.Headers, h.authService)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusForbidden,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
 	favoriteId := request.QueryStringParameters["favoriteId"]
 	err = h.favoriteService.DeleteFavorite(favoriteId)
 	if err != nil {
-		return events.APIGatewayProxyResponse{}, err
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
 	}
 
-	response := events.APIGatewayProxyResponse{
+	response := events.APIGatewayV2HTTPResponse{
 		StatusCode: http.StatusNoContent,
 	}
 	return response, nil
 }
 
-func (h *FavoritesLambdaHandler) RouteRequest(request events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+func (h *FavoritesLambdaHandler) RouteRequest(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	requestMarshalled, _ := jsoniter.MarshalToString(request)
 	fmt.Printf("request: %v", requestMarshalled)
 	switch request.RouteKey {
@@ -159,14 +186,14 @@ func (h *FavoritesLambdaHandler) RouteRequest(request events.APIGatewayV2HTTPReq
 			return h.DeleteFavorite(request)
 		default:
 			fmt.Println("invalid method in request:", request)
-			return events.APIGatewayProxyResponse{
+			return events.APIGatewayV2HTTPResponse{
 				StatusCode: http.StatusBadRequest,
 				Body:       messageToResponseBody(fmt.Sprintf("invalid request method: '%s'", request.RouteKey)),
 			}, nil
 		}
 	default:
 		fmt.Printf("invalid path in request: %v", request)
-		return events.APIGatewayProxyResponse{
+		return events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       messageToResponseBody(fmt.Sprintf("invalid request path: '%s'", request.RawPath)),
 		}, nil

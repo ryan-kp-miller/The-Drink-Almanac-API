@@ -10,7 +10,7 @@ import (
 	"the-drink-almanac-api/store"
 )
 
-func start(request events.APIGatewayV2HTTPRequest) (events.APIGatewayProxyResponse, error) {
+func start(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	fmt.Println("starting favorites lambda")
 	appConfig := model.NewAppConfig()
 	authService := service.NewJwtAuthService(appConfig.JwtSecretKey)
