@@ -25,6 +25,14 @@ func NewFavoritesLambdaHandler(favoriteService service.FavoriteService, authServ
 }
 
 func (h *FavoritesLambdaHandler) FindAllFavorites(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+	_, err := authorizeUser(request.Headers, h.authService)
+	if err != nil {
+		return events.APIGatewayV2HTTPResponse{
+			StatusCode: http.StatusForbidden,
+			Body:       messageToResponseBody(err.Error()),
+		}, nil
+	}
+
 	favorites, err := h.favoriteService.FindAllFavorites()
 	if err != nil {
 		return events.APIGatewayV2HTTPResponse{
@@ -99,7 +107,7 @@ func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HT
 	}
 
 	var newFavoritePostRequest dto.FavoritePostRequest
-	if err := jsoniter.Unmarshal([]byte(request.Body), newFavoritePostRequest); err != nil {
+	if err := jsoniter.Unmarshal([]byte(request.Body), &newFavoritePostRequest); err != nil {
 		response := events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       messageToResponseBody(err.Error()),
@@ -120,10 +128,11 @@ func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HT
 		if errors.As(err, &apperrors.FavoriteAlreadyExistsError{}) {
 			response := events.APIGatewayV2HTTPResponse{
 				StatusCode: http.StatusConflict,
-				Body:       messageToResponseBody(fmt.Sprintf("the user '%s' already favorited the drink with id '%s'", newFavorite.UserId, newFavorite.DrinkId)),
+				Body:       messageToResponseBody(fmt.Sprintf("the user '%s' already favorited the drink with id '%s'", userId, newFavoritePostRequest.DrinkId)),
 			}
 			return response, nil
 		}
+
 		response := events.APIGatewayV2HTTPResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       messageToResponseBody(fmt.Sprintf("unable to add the new favorite due to %s", err.Error())),
