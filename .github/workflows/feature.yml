@@ -24,7 +24,7 @@ jobs:
         run: bash ./scripts/run_and_clean_go_test_output.sh
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/reports/
@@ -34,3 +34,4 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           verbose: true
+          codecov_yml_path: codecov.yml
