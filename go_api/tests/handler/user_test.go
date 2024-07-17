@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"the-drink-almanac-api/appErrors"
+
 	"the-drink-almanac-api/dto"
+	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/handler/server"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
@@ -127,7 +128,7 @@ func TestCreateNewUser(t *testing.T) {
 			password:             "0",
 			requestBody:          []byte(`{"username": "0", "password": "0"}`),
 			returnedUser:         mockUser,
-			returnedError:        appErrors.NewUserAlreadyExistsError("user exists"),
+			returnedError:        errors.NewUserAlreadyExistsError("user exists"),
 			expectedStatusCode:   http.StatusConflict,
 			shouldMethodBeCalled: true,
 		},

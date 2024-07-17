@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"the-drink-almanac-api/appErrors"
+
 	"the-drink-almanac-api/dto"
+	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -58,7 +59,7 @@ func (fh *FavoriteHandler) CreateNewFavorite(c *gin.Context) {
 	userId := c.GetString("userId")
 	newFavorite, err := fh.Service.CreateNewFavorite(newFavoritePostRequest.DrinkId, userId)
 	if err != nil {
-		if errors.As(err, &appErrors.FavoriteAlreadyExistsError{}) {
+		if errors.As(err, &errors.FavoriteAlreadyExistsError{}) {
 			c.JSON(http.StatusConflict, gin.H{
 				"message": fmt.Sprintf("the user '%s' already favorited the drink with id '%s'", newFavorite.UserId, newFavorite.DrinkId),
 			})

@@ -3,7 +3,8 @@ package service
 import (
 	"fmt"
 	"testing"
-	"the-drink-almanac-api/appErrors"
+
+	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
@@ -257,7 +258,7 @@ func TestDefaultUserService_Login(t *testing.T) {
 			isStoreFindUserByUsernameCalled: true,
 			FindUserByUsernameError:         nil,
 			existingUser:                    nil,
-			expectedError:                   appErrors.NewUserNotFoundError("0"),
+			expectedError:                   errors.NewUserNotFoundError("0"),
 		},
 		{
 			name:                            "Username is empty",
@@ -284,7 +285,7 @@ func TestDefaultUserService_Login(t *testing.T) {
 			isStoreFindUserByUsernameCalled: true,
 			FindUserByUsernameError:         nil,
 			existingUser:                    mockUser,
-			expectedError:                   appErrors.NewIncorrectPasswordError("0"),
+			expectedError:                   errors.NewIncorrectPasswordError("0"),
 		},
 	}
 	for _, tt := range tests {

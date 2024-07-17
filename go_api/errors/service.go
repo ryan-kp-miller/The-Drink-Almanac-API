@@ -1,4 +1,4 @@
-package appErrors
+package errors
 
 import "fmt"
 
