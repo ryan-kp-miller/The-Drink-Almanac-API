@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"the-drink-almanac-api/mocks"
+	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -57,7 +57,7 @@ func TestAuthUser(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockAuthService := mocks.NewAuthService(t)
+			mockAuthService := service.NewMockAuthService(t)
 			if d.token != "" {
 				mockAuthService.On("ValidateToken", d.token).Return(d.userId, d.authError)
 			}
