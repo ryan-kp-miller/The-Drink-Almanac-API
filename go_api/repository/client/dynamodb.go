@@ -1,3 +1,4 @@
+//go:generate mockery --name=DDBClient --output=./ --outpkg=client --filename=dynamodb_mock.go --inpackage
 package client
 
 import (

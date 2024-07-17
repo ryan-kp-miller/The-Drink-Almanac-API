@@ -12,8 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/repository/client"
 )
 
 func TestFavoriteStoreDDB_FindAll(t *testing.T) {
@@ -58,7 +58,7 @@ func TestFavoriteStoreDDB_FindAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("Scan", context.TODO(), scanInput).Return(scanOutput, tt.returnedError)
 			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			got, err := favoriteStore.FindAll()
@@ -116,7 +116,7 @@ func TestFavoriteStoreDDB_FindFavoritesByUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.scanOutput, tt.returnedError)
 			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			actualFavorites, err := favoriteStore.FindFavoritesByUser(tt.userId)
@@ -162,7 +162,7 @@ func TestFavoriteStoreDDB_CreateNewFavorite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("PutItem", context.TODO(), putItemInput).Return(putItemOutput, tt.returnedError)
 			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			err := favoriteStore.CreateNewFavorite(tt.expectedFavorite)
@@ -208,7 +208,7 @@ func TestFavoriteStoreDDB_DeleteFavorite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("DeleteItem", context.TODO(), deleteItemInput).Return(deleteItemOutput, tt.returnedError)
 			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			err := favoriteStore.DeleteFavorite(tt.expectedFavorite.Id)

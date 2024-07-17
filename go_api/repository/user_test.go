@@ -12,8 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/repository/client"
 )
 
 func TestUserStoreDDB_FindAll(t *testing.T) {
@@ -56,7 +56,7 @@ func TestUserStoreDDB_FindAll(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("Scan", context.TODO(), scanInput).Return(scanOutput, tt.returnedError)
 			userStore := UserRepositoryDDB{DynamodbClient: mockDdbClient}
 			got, err := userStore.FindAll()
@@ -127,7 +127,7 @@ func TestUserStoreDDB_FindUserByUsername(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.queryOutput, tt.returnedError)
 			userStore := UserRepositoryDDB{DynamodbClient: mockDdbClient}
 			actualUser, err := userStore.FindUserByUsername(tt.username)
@@ -193,7 +193,7 @@ func TestUserStoreDDB_FindUserById(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.queryOutput, tt.returnedError)
 			userStore := UserRepositoryDDB{DynamodbClient: mockDdbClient}
 			actualUser, err := userStore.FindUserById(tt.username)
@@ -239,7 +239,7 @@ func TestUserStoreDDB_CreateNewUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("PutItem", context.TODO(), putItemInput).Return(putItemOutput, tt.returnedError)
 			userStore := UserRepositoryDDB{DynamodbClient: mockDdbClient}
 			err := userStore.CreateNewUser(tt.expectedUser)
@@ -285,7 +285,7 @@ func TestUserStoreDDB_DeleteUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockDdbClient := mocks.NewDDBClient(t)
+			mockDdbClient := client.NewMockDDBClient(t)
 			mockDdbClient.On("DeleteItem", context.TODO(), deleteItemInput).Return(deleteItemOutput, tt.returnedError)
 			userStore := UserRepositoryDDB{DynamodbClient: mockDdbClient}
 			err := userStore.DeleteUser(tt.expectedUser.Id)
