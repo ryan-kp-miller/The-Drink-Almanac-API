@@ -1,4 +1,5 @@
-package store
+//go:generate mockery --name=UserRepository --output=./ --outpkg=repository --filename=user_mock.go --inpackage
+package repository
 
 import (
 	"context"
@@ -6,7 +7,7 @@ import (
 	"strconv"
 
 	"the-drink-almanac-api/model"
-	"the-drink-almanac-api/store/client"
+	"the-drink-almanac-api/repository/client"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -15,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-type UserStore interface {
+type UserRepository interface {
 	FindAll() ([]model.User, error)
 	FindUserById(userId string) (*model.User, error)
 	FindUserByUsername(username string) (*model.User, error)
@@ -23,17 +24,25 @@ type UserStore interface {
 	DeleteUser(id string) error
 }
 
-type UserStoreDDB struct {
+func NewUserRepository(tableName string, awsEndpoint string) (*UserRepositoryDDB, error) {
+	ddbClient, err := client.CreateLocalDDBClient(awsEndpoint)
+	return &UserRepositoryDDB{
+		DynamodbClient: ddbClient,
+		TableName:      tableName,
+	}, err
+}
+
+type UserRepositoryDDB struct {
 	DynamodbClient client.DDBClient
 	TableName      string
 }
 
-func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
+func (r *UserRepositoryDDB) FindAll() ([]model.User, error) {
 	scanInput := dynamodb.ScanInput{
-		TableName: aws.String(usd.TableName),
+		TableName: aws.String(r.TableName),
 	}
 	ctx := context.TODO()
-	scanOutput, err := usd.DynamodbClient.Scan(ctx, &scanInput)
+	scanOutput, err := r.DynamodbClient.Scan(ctx, &scanInput)
 	if err != nil {
 		return nil, err
 	}
@@ -46,13 +55,13 @@ func (usd *UserStoreDDB) FindAll() ([]model.User, error) {
 	return users, nil
 }
 
-// FindUserByUsername checks the store's user table for any users with the given username;
+// FindUserByUsername checks the repository's user table for any users with the given username;
 //
 // Returns:
 //   - an error if there are multiple users with that username
 //   - the user if there is only 1 user
 //   - nil if there are 0 users
-func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error) {
+func (r *UserRepositoryDDB) FindUserByUsername(username string) (*model.User, error) {
 	filterExpression, err := expression.NewBuilder().WithKeyCondition(
 		expression.Key("username").Equal(expression.Value(username)),
 	).Build()
@@ -61,7 +70,7 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 	}
 
 	queryInput := dynamodb.QueryInput{
-		TableName:                 aws.String(usd.TableName),
+		TableName:                 aws.String(r.TableName),
 		IndexName:                 aws.String("username-index"),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
@@ -69,7 +78,7 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 	}
 
 	ctx := context.TODO()
-	scanOutput, err := usd.DynamodbClient.Query(ctx, &queryInput)
+	scanOutput, err := r.DynamodbClient.Query(ctx, &queryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -89,13 +98,13 @@ func (usd *UserStoreDDB) FindUserByUsername(username string) (*model.User, error
 	}
 }
 
-// FindUserById checks the store's user table for any users with the given userId;
+// FindUserById checks the repository's user table for any users with the given userId;
 //
 // Returns:
 //   - an error if there are multiple users with that username
 //   - the user if there is only 1 user
 //   - nil if there are 0 users
-func (usd *UserStoreDDB) FindUserById(userId string) (*model.User, error) {
+func (r *UserRepositoryDDB) FindUserById(userId string) (*model.User, error) {
 	filterExpression, err := expression.NewBuilder().WithKeyCondition(
 		expression.Key("id").Equal(expression.Value(userId)),
 	).Build()
@@ -104,13 +113,13 @@ func (usd *UserStoreDDB) FindUserById(userId string) (*model.User, error) {
 	}
 
 	queryInput := dynamodb.QueryInput{
-		TableName:                 aws.String(usd.TableName),
+		TableName:                 aws.String(r.TableName),
 		ExpressionAttributeNames:  filterExpression.Names(),
 		ExpressionAttributeValues: filterExpression.Values(),
 		KeyConditionExpression:    filterExpression.KeyCondition(),
 	}
 	ctx := context.TODO()
-	queryOutput, err := usd.DynamodbClient.Query(ctx, &queryInput)
+	queryOutput, err := r.DynamodbClient.Query(ctx, &queryInput)
 	if err != nil {
 		return nil, err
 	}
@@ -130,12 +139,12 @@ func (usd *UserStoreDDB) FindUserById(userId string) (*model.User, error) {
 	}
 }
 
-// CreateNewUser simply inserts the provided user into the store's user table
+// CreateNewUser simply inserts the provided user into the repository's user table
 //
 // Please ensure that you aren't inserting a duplicate record (i.e. user with that username already exists)
-func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
-	_, err := usd.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(usd.TableName),
+func (r *UserRepositoryDDB) CreateNewUser(user model.User) error {
+	_, err := r.DynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(r.TableName),
 		Item: map[string]types.AttributeValue{
 			"id":       &types.AttributeValueMemberS{Value: user.Id},
 			"username": &types.AttributeValueMemberS{Value: user.Username},
@@ -146,21 +155,13 @@ func (usd *UserStoreDDB) CreateNewUser(user model.User) error {
 }
 
 // DeleteUser removes the record associated with the given id
-// from the store's user table
-func (usd *UserStoreDDB) DeleteUser(id string) error {
-	_, err := usd.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
-		TableName: aws.String(usd.TableName),
+// from the repository's user table
+func (r *UserRepositoryDDB) DeleteUser(id string) error {
+	_, err := r.DynamodbClient.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+		TableName: aws.String(r.TableName),
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: id},
 		},
 	})
 	return err
-}
-
-func NewUserStoreDDB(tableName string, awsEndpoint string) (*UserStoreDDB, error) {
-	ddbClient, err := client.CreateLocalDDBClient(awsEndpoint)
-	return &UserStoreDDB{
-		DynamodbClient: ddbClient,
-		TableName:      tableName,
-	}, err
 }

@@ -5,14 +5,14 @@ import (
 
 	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/model"
-	"the-drink-almanac-api/store"
+	"the-drink-almanac-api/repository"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
-	// FindAllUsers returns all users in the user store
+	// FindAllUsers returns all users in the user repository
 	FindAllUsers() ([]model.User, error)
 
 	// FindUser retrieves the user's data based on their id
@@ -22,7 +22,7 @@ type UserService interface {
 	// or returns the existing user and the UserAlreadyExistsError
 	CreateNewUser(username, password string) (*model.User, error)
 
-	// DeleteUser removes the user's record from the user store
+	// DeleteUser removes the user's record from the user repository
 	DeleteUser(userId string) error
 
 	// Login checks if a user exists with the provided username and password;
@@ -34,15 +34,15 @@ type UserService interface {
 }
 
 type DefaultUserService struct {
-	store store.UserStore
+	repo repository.UserRepository
 }
 
 func (s DefaultUserService) FindAllUsers() ([]model.User, error) {
-	return s.store.FindAll()
+	return s.repo.FindAll()
 }
 
 func (s DefaultUserService) FindUser(userId string) (*model.User, error) {
-	return s.store.FindUserById(userId)
+	return s.repo.FindUserById(userId)
 }
 
 func (s DefaultUserService) CreateNewUser(username, password string) (*model.User, error) {
@@ -54,7 +54,7 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 	}
 
 	// ensure that we aren't creating a duplicate user by check for an existing record with the same username
-	user, err := s.store.FindUserByUsername(username)
+	user, err := s.repo.FindUserByUsername(username)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 		Username: username,
 		Password: hashedPassword,
 	}
-	err = s.store.CreateNewUser(*user)
+	err = s.repo.CreateNewUser(*user)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 }
 
 func (s DefaultUserService) DeleteUser(userId string) error {
-	return s.store.DeleteUser(userId)
+	return s.repo.DeleteUser(userId)
 }
 
 func (s DefaultUserService) Login(username, password string) (*model.User, error) {
@@ -91,7 +91,7 @@ func (s DefaultUserService) Login(username, password string) (*model.User, error
 		return nil, fmt.Errorf("the password must not be empty")
 	}
 
-	user, err := s.store.FindUserByUsername(username)
+	user, err := s.repo.FindUserByUsername(username)
 	if err != nil {
 		return nil, err
 	}
@@ -107,9 +107,9 @@ func (s DefaultUserService) Login(username, password string) (*model.User, error
 	return user, nil
 }
 
-func NewDefaultUserService(store store.UserStore) DefaultUserService {
+func NewDefaultUserService(store repository.UserRepository) DefaultUserService {
 	return DefaultUserService{
-		store: store,
+		repo: store,
 	}
 }
 

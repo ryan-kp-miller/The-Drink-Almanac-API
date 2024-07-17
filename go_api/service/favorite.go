@@ -5,6 +5,7 @@ import (
 
 	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/repository"
 
 	"github.com/google/uuid"
 )
@@ -22,16 +23,20 @@ type FavoriteService interface {
 	DeleteFavorite(id string) error
 }
 
+func NewDefaultFavoriteService(repo repository.FavoriteRepository) DefaultFavoriteService {
+	return DefaultFavoriteService{repo: repo}
+}
+
 type DefaultFavoriteService struct {
-	store model.FavoriteStore
+	repo repository.FavoriteRepository
 }
 
 func (s DefaultFavoriteService) FindAllFavorites() ([]model.Favorite, error) {
-	return s.store.FindAll()
+	return s.repo.FindAll()
 }
 
 func (s DefaultFavoriteService) FindFavoritesByUser(userId string) ([]model.Favorite, error) {
-	return s.store.FindFavoritesByUser(userId)
+	return s.repo.FindFavoritesByUser(userId)
 }
 
 func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*model.Favorite, error) {
@@ -43,7 +48,7 @@ func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*mode
 	}
 
 	// check if a favorite already exists for this drink/user id pair
-	userFavorites, err := s.store.FindFavoritesByUser(userId)
+	userFavorites, err := s.repo.FindFavoritesByUser(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +72,7 @@ func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*mode
 		UserId:  userId,
 		DrinkId: drinkId,
 	}
-	err = s.store.CreateNewFavorite(newFavorite)
+	err = s.repo.CreateNewFavorite(newFavorite)
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +81,5 @@ func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*mode
 }
 
 func (s DefaultFavoriteService) DeleteFavorite(id string) error {
-	return s.store.DeleteFavorite(id)
-}
-
-func NewDefaultFavoriteService(store model.FavoriteStore) DefaultFavoriteService {
-	return DefaultFavoriteService{store: store}
+	return s.repo.DeleteFavorite(id)
 }

@@ -7,8 +7,8 @@ import (
 	"the-drink-almanac-api/handler/middleware"
 	"the-drink-almanac-api/handler/server"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/repository"
 	"the-drink-almanac-api/service"
-	"the-drink-almanac-api/store"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +25,7 @@ func Start(port string) {
 	authMiddleware := middleware.NewAuthMiddleware(authService)
 
 	// set up favorite endpoints
-	favoriteStore, _ := store.NewFavoriteStoreDDB(appConfig.FavoritesTableName, appConfig.AwsEndpoint)
+	favoriteStore, _ := repository.NewFavoriteRepository(appConfig.FavoritesTableName, appConfig.AwsEndpoint)
 	favoriteService := service.NewDefaultFavoriteService(favoriteStore)
 	favoriteHandler := server.FavoriteHandler{Service: favoriteService}
 	favoriteRouteGroup := router.Group("/favorite")
@@ -34,7 +34,7 @@ func Start(port string) {
 	favoriteRouteGroup.DELETE("/:favoriteId", authMiddleware.AuthUser, favoriteHandler.DeleteFavorite)
 
 	// set up user endpoints
-	userStore, _ := store.NewUserStoreDDB(appConfig.UsersTableName, appConfig.AwsEndpoint)
+	userStore, _ := repository.NewUserRepository(appConfig.UsersTableName, appConfig.AwsEndpoint)
 	userService := service.NewDefaultUserService(userStore)
 	userHandler := server.NewUserHandler(userService, authService)
 	userRouteGroup := router.Group("/user")

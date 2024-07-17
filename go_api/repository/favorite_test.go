@@ -1,4 +1,4 @@
-package store
+package repository
 
 import (
 	"context"
@@ -60,14 +60,14 @@ func TestFavoriteStoreDDB_FindAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
 			mockDdbClient.On("Scan", context.TODO(), scanInput).Return(scanOutput, tt.returnedError)
-			favoriteStore := FavoriteStoreDDB{DynamodbClient: mockDdbClient}
+			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			got, err := favoriteStore.FindAll()
 			if (err != nil) != tt.expectError {
-				t.Errorf("FavoriteStoreDDB.FindAll() error = %v", err)
+				t.Errorf("FavoriteRepository.FindAll() error = %v", err)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.expectedFavorites) {
-				t.Errorf("FavoriteStoreDDB.FindAll() = %v, want %v", got, tt.expectedFavorites)
+				t.Errorf("FavoriteRepository.FindAll() = %v, want %v", got, tt.expectedFavorites)
 			}
 		})
 	}
@@ -118,10 +118,10 @@ func TestFavoriteStoreDDB_FindFavoritesByUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
 			mockDdbClient.On("Query", context.TODO(), mock.AnythingOfType("*dynamodb.QueryInput")).Return(tt.scanOutput, tt.returnedError)
-			favoriteStore := FavoriteStoreDDB{DynamodbClient: mockDdbClient}
+			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			actualFavorites, err := favoriteStore.FindFavoritesByUser(tt.userId)
-			assert.Equal(t, tt.expectError, err != nil, "FavoriteStoreDDB.FindFavoritesByUser() error = %v", err)
-			assert.Equal(t, tt.expectedFavorites, actualFavorites, "FavoriteStoreDDB.FindFavoritesByUser() = %v, want %v", actualFavorites, tt.expectedFavorites)
+			assert.Equal(t, tt.expectError, err != nil, "FavoriteRepository.FindFavoritesByUser() error = %v", err)
+			assert.Equal(t, tt.expectedFavorites, actualFavorites, "FavoriteRepository.FindFavoritesByUser() = %v, want %v", actualFavorites, tt.expectedFavorites)
 		})
 	}
 }
@@ -164,10 +164,10 @@ func TestFavoriteStoreDDB_CreateNewFavorite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
 			mockDdbClient.On("PutItem", context.TODO(), putItemInput).Return(putItemOutput, tt.returnedError)
-			favoriteStore := FavoriteStoreDDB{DynamodbClient: mockDdbClient}
+			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			err := favoriteStore.CreateNewFavorite(tt.expectedFavorite)
 			if (err != nil) != tt.expectError {
-				t.Errorf("FavoriteStoreDDB.CreateNewFavorite() error = %v", err)
+				t.Errorf("FavoriteRepository.CreateNewFavorite() error = %v", err)
 				return
 			}
 		})
@@ -210,10 +210,10 @@ func TestFavoriteStoreDDB_DeleteFavorite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockDdbClient := mocks.NewDDBClient(t)
 			mockDdbClient.On("DeleteItem", context.TODO(), deleteItemInput).Return(deleteItemOutput, tt.returnedError)
-			favoriteStore := FavoriteStoreDDB{DynamodbClient: mockDdbClient}
+			favoriteStore := FavoriteRepositoryDDB{DynamodbClient: mockDdbClient}
 			err := favoriteStore.DeleteFavorite(tt.expectedFavorite.Id)
 			if (err != nil) != tt.expectError {
-				t.Errorf("FavoriteStoreDDB.DeleteFavorite() error = %v", err)
+				t.Errorf("FavoriteRepository.DeleteFavorite() error = %v", err)
 				return
 			}
 		})
