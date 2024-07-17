@@ -1,3 +1,4 @@
+//go:generate mockery --name=UserService --output=./ --outpkg=service --filename=user_mock.go --inpackage
 package service
 
 import (

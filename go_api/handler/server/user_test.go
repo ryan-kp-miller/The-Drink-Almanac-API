@@ -10,8 +10,8 @@ import (
 
 	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -56,11 +56,11 @@ func TestFindUser(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockUserService := mocks.NewUserService(t)
+			mockUserService := service.NewMockUserService(t)
 			if d.userId != "" {
 				mockUserService.On("FindUser", d.userId).Return(d.returnedUser, d.returnedError)
 			}
-			mockAuthService := mocks.NewAuthService(t)
+			mockAuthService := service.NewMockAuthService(t)
 			userHandler := NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
@@ -185,11 +185,11 @@ func TestCreateNewUser(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockUserService := mocks.NewUserService(t)
+			mockUserService := service.NewMockUserService(t)
 			if d.shouldMethodBeCalled {
 				mockUserService.On("CreateNewUser", d.username, d.password).Return(d.returnedUser, d.returnedError)
 			}
-			mockAuthService := mocks.NewAuthService(t)
+			mockAuthService := service.NewMockAuthService(t)
 			userHandler := NewUserHandler(mockUserService, mockAuthService)
 
 			rr := httptest.NewRecorder()
@@ -247,8 +247,8 @@ func TestDeleteUser(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockUserService := mocks.NewUserService(t)
-			mockAuthService := mocks.NewAuthService(t)
+			mockUserService := service.NewMockUserService(t)
+			mockAuthService := service.NewMockAuthService(t)
 			if d.userId != "" {
 				mockUserService.On("DeleteUser", d.userId).Return(d.returnedError)
 			}
@@ -367,11 +367,11 @@ func TestLogin(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockUserService := mocks.NewUserService(t)
+			mockUserService := service.NewMockUserService(t)
 			if d.shouldMethodBeCalled {
 				mockUserService.On("Login", d.username, d.password).Return(d.returnedUser, d.returnedError)
 			}
-			mockAuthService := mocks.NewAuthService(t)
+			mockAuthService := service.NewMockAuthService(t)
 			if d.shouldReturnToken {
 				mockAuthService.On("CreateNewToken", d.returnedUser.Id, mock.Anything).Return("testToken", nil)
 			}

@@ -10,8 +10,8 @@ import (
 
 	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -58,7 +58,7 @@ func TestFindAllFavorites(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockFavoriteService := mocks.NewFavoriteService(t)
+			mockFavoriteService := service.NewMockFavoriteService(t)
 			mockFavoriteService.On("FindAllFavorites").Return(d.returnedFavorites, d.returnedError)
 			favoriteHandler := FavoriteHandler{Service: mockFavoriteService}
 
@@ -129,7 +129,7 @@ func TestFindFavoritesByUser(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockFavoriteService := mocks.NewFavoriteService(t)
+			mockFavoriteService := service.NewMockFavoriteService(t)
 			mockFavoriteService.On("FindFavoritesByUser", d.userId).Return(d.returnedFavorites, d.returnedError)
 			favoriteHandler := FavoriteHandler{Service: mockFavoriteService}
 
@@ -237,7 +237,7 @@ func TestCreateNewFavorite(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockFavoriteService := mocks.NewFavoriteService(t)
+			mockFavoriteService := service.NewMockFavoriteService(t)
 			if d.shouldMethodBeCalled {
 				mockFavoriteService.On("CreateNewFavorite", d.drinkId, d.userId).Return(d.returnedFavorite, d.returnedError)
 			}
@@ -294,7 +294,7 @@ func TestDeleteFavorite(t *testing.T) {
 
 	for _, d := range data {
 		t.Run(d.testName, func(t *testing.T) {
-			mockFavoriteService := mocks.NewFavoriteService(t)
+			mockFavoriteService := service.NewMockFavoriteService(t)
 			mockFavoriteService.On("DeleteFavorite", d.favoriteId).Return(d.returnedError)
 			favoriteHandler := FavoriteHandler{Service: mockFavoriteService}
 

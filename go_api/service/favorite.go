@@ -1,3 +1,4 @@
+//go:generate mockery --name=FavoriteService --output=./ --outpkg=service --filename=favorite_mock.go --inpackage
 package service
 
 import (

@@ -1,3 +1,4 @@
+//go:generate mockery --name=AuthService --output=./ --outpkg=service --filename=auth_mock.go --inpackage
 package service
 
 import (
