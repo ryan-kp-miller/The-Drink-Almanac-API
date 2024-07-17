@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"the-drink-almanac-api/apperrors"
-	"the-drink-almanac-api/mocks"
-	"the-drink-almanac-api/model"
-	"the-drink-almanac-api/service"
-
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
+	"the-drink-almanac-api/apperrors"
+	"the-drink-almanac-api/mocks"
+	"the-drink-almanac-api/model"
 )
 
 func TestDefaultUserService_FindAllUsers(t *testing.T) {
@@ -56,7 +54,7 @@ func TestDefaultUserService_FindAllUsers(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockUserStore := mocks.NewUserStore(t)
 			mockUserStore.On("FindAll").Return(tt.returnedUsers, tt.returnedError)
-			userService := service.NewDefaultUserService(mockUserStore)
+			userService := NewDefaultUserService(mockUserStore)
 			users, err := userService.FindAllUsers()
 			assert.Equal(t, users, tt.returnedUsers, "The users returned by FindAllUsers() does not match the expected users; actual users = %v; expected users = %v", users, tt.returnedUsers)
 			if tt.expectError {
@@ -152,7 +150,7 @@ func TestDefaultUserService_CreateNewUser(t *testing.T) {
 				mockUserStore.On("CreateNewUser", mock.AnythingOfType("model.User")).Return(tt.returnedError)
 			}
 
-			userService := service.NewDefaultUserService(mockUserStore)
+			userService := NewDefaultUserService(mockUserStore)
 			user, err := userService.CreateNewUser(tt.username, tt.password)
 			if tt.expectError {
 				assert.NotNil(t, err, "An error should have been returned from userService.CreateNewUser")
@@ -204,7 +202,7 @@ func TestDefaultUserService_DeleteUser(t *testing.T) {
 				mockUserStore.On("DeleteUser", tt.userId).Return(tt.storeReturnedError)
 			}
 
-			userService := service.NewDefaultUserService(mockUserStore)
+			userService := NewDefaultUserService(mockUserStore)
 			err := userService.DeleteUser(tt.userId)
 
 			if tt.expectError {
@@ -295,7 +293,7 @@ func TestDefaultUserService_Login(t *testing.T) {
 				mockUserStore.On("FindUserByUsername", tt.username).Return(tt.existingUser, tt.FindUserByUsernameError)
 			}
 
-			userService := service.NewDefaultUserService(mockUserStore)
+			userService := NewDefaultUserService(mockUserStore)
 			user, err := userService.Login(tt.username, tt.password)
 			assert.Equal(t, tt.expectedError, err)
 			if tt.expectedError == nil {

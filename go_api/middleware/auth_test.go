@@ -1,11 +1,11 @@
-package tests
+package middleware
 
 import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"the-drink-almanac-api/middleware"
+
 	"the-drink-almanac-api/mocks"
 
 	"github.com/gin-gonic/gin"
@@ -61,7 +61,7 @@ func TestAuthUser(t *testing.T) {
 			if d.token != "" {
 				mockAuthService.On("ValidateToken", d.token).Return(d.userId, d.authError)
 			}
-			authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
+			authMiddleware := NewAuthMiddleware(mockAuthService)
 
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/user", nil)

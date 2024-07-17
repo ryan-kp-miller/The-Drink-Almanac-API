@@ -1,8 +1,7 @@
-package store
+package model
 
 import (
 	"testing"
-	"the-drink-almanac-api/model"
 )
 
 func TestDefaultEnv(t *testing.T) {
@@ -40,7 +39,7 @@ func TestDefaultEnv(t *testing.T) {
 			if tt.shouldSetEnv {
 				t.Setenv(tt.args.envVarName, tt.want)
 			}
-			if got := model.DefaultEnv(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
+			if got := DefaultEnv(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
 				t.Errorf("DefaultEnv() = %v, want %v", got, tt.want)
 			}
 		})

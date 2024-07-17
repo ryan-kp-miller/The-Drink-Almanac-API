@@ -3,13 +3,12 @@ package service
 import (
 	"fmt"
 	"testing"
-	"the-drink-almanac-api/mocks"
-	"the-drink-almanac-api/model"
-	"the-drink-almanac-api/service"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"the-drink-almanac-api/mocks"
+	"the-drink-almanac-api/model"
 )
 
 func TestDefaultFavoriteService_FindAllFavorites(t *testing.T) {
@@ -53,7 +52,7 @@ func TestDefaultFavoriteService_FindAllFavorites(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockFavoriteStore := mocks.NewFavoriteStore(t)
 			mockFavoriteStore.On("FindAll").Return(tt.returnedFavorites, tt.returnedError)
-			favoriteService := service.NewDefaultFavoriteService(mockFavoriteStore)
+			favoriteService := NewDefaultFavoriteService(mockFavoriteStore)
 			favorites, err := favoriteService.FindAllFavorites()
 			assert.Equal(t, favorites, tt.returnedFavorites, "The favorites returned by FindAllFavorites() does not match the expected favorites; actual favorites = %v; expected favorites = %v", favorites, tt.returnedFavorites)
 			if tt.expectError {
@@ -161,7 +160,7 @@ func TestDefaultFavoriteService_CreateNewFavorite(t *testing.T) {
 				mockFavoriteStore.On("CreateNewFavorite", mock.AnythingOfType("model.Favorite")).Return(tt.returnedError)
 			}
 
-			favoriteService := service.NewDefaultFavoriteService(mockFavoriteStore)
+			favoriteService := NewDefaultFavoriteService(mockFavoriteStore)
 			favorite, err := favoriteService.CreateNewFavorite(tt.drinkId, tt.userId)
 			if tt.expectError {
 				assert.NotNil(t, err, "An error should have been returned from favoriteService.CreateNewFavorite")
@@ -221,7 +220,7 @@ func TestDefaultFavoriteService_FindFavoritesByUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockFavoriteStore := mocks.NewFavoriteStore(t)
 			mockFavoriteStore.On("FindFavoritesByUser", tt.id).Return(tt.returnedFavorites, tt.returnedError)
-			favoriteService := service.NewDefaultFavoriteService(mockFavoriteStore)
+			favoriteService := NewDefaultFavoriteService(mockFavoriteStore)
 			favorites, err := favoriteService.FindFavoritesByUser(tt.id)
 			assert.Equal(t, favorites, tt.returnedFavorites)
 			if tt.expectError {
@@ -258,7 +257,7 @@ func TestDefaultFavoriteService_DeleteFavorite(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockFavoriteStore := mocks.NewFavoriteStore(t)
 			mockFavoriteStore.On("DeleteFavorite", tt.id).Return(tt.returnedError)
-			favoriteService := service.NewDefaultFavoriteService(mockFavoriteStore)
+			favoriteService := NewDefaultFavoriteService(mockFavoriteStore)
 			err := favoriteService.DeleteFavorite(tt.id)
 			if tt.expectError {
 				assert.NotNil(t, err, "An error should have been returned from favoriteService.DeleteFavorite")
