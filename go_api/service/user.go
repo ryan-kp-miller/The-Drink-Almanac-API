@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"the-drink-almanac-api/errors"
+	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/store"
 
@@ -59,7 +59,7 @@ func (s DefaultUserService) CreateNewUser(username, password string) (*model.Use
 		return nil, err
 	}
 	if user != nil {
-		return user, errors.NewUserAlreadyExistsError(username)
+		return user, apperrors.NewUserAlreadyExistsError(username)
 	}
 
 	hashedPassword, err := getHashedPassword(password)
@@ -96,12 +96,12 @@ func (s DefaultUserService) Login(username, password string) (*model.User, error
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.NewUserNotFoundError(username)
+		return nil, apperrors.NewUserNotFoundError(username)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, errors.NewIncorrectPasswordError(user.Username)
+		return nil, apperrors.NewIncorrectPasswordError(user.Username)
 	}
 
 	return user, nil

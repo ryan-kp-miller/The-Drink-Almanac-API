@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"
@@ -64,7 +64,7 @@ func (uh *UserHandler) CreateNewUser(c *gin.Context) {
 	}
 	user, err := uh.userService.CreateNewUser(userRequest.Username, userRequest.Password)
 	if err != nil {
-		if errors.As(err, &errors.UserAlreadyExistsError{}) {
+		if errors.As(err, &apperrors.UserAlreadyExistsError{}) {
 			c.JSON(http.StatusConflict, gin.H{
 				"message": fmt.Sprintf("a user already exists with the username %s", user.Username),
 			})
@@ -88,7 +88,7 @@ func (uh *UserHandler) DeleteUser(c *gin.Context) {
 	err := uh.userService.DeleteUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if errors.As(err, &errors.InvalidAuthTokenError{}) {
+		if errors.As(err, &apperrors.InvalidAuthTokenError{}) {
 			statusCode = http.StatusForbidden
 		}
 		c.JSON(statusCode, gin.H{"message": err.Error()})
@@ -126,10 +126,10 @@ func (uh *UserHandler) Login(c *gin.Context) {
 	user, err := uh.userService.Login(userRequest.Username, userRequest.Password)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if errors.As(err, &errors.UserNotFoundError{}) {
+		if errors.As(err, &apperrors.UserNotFoundError{}) {
 			statusCode = http.StatusNotFound
 		}
-		if errors.As(err, &errors.IncorrectPasswordError{}) {
+		if errors.As(err, &apperrors.IncorrectPasswordError{}) {
 			statusCode = http.StatusBadRequest
 		}
 

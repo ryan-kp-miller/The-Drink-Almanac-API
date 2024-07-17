@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	jsoniter "github.com/json-iterator/go"
+	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/service"
 )
 
@@ -85,7 +85,7 @@ func (h *UsersLambdaHandler) CreateNewUser(request events.APIGatewayV2HTTPReques
 
 	user, err := h.userService.CreateNewUser(userRequest.Username, userRequest.Password)
 	if err != nil {
-		if errors.As(err, &errors.UserAlreadyExistsError{}) {
+		if errors.As(err, &apperrors.UserAlreadyExistsError{}) {
 			response := events.APIGatewayV2HTTPResponse{
 				StatusCode: http.StatusConflict,
 				Body:       messageToResponseBody(fmt.Sprintf("a user already exists with the username %s", user.Username)),
@@ -116,7 +116,7 @@ func (h *UsersLambdaHandler) DeleteUser(request events.APIGatewayV2HTTPRequest) 
 	err = h.userService.DeleteUser(userId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if errors.As(err, &errors.InvalidAuthTokenError{}) {
+		if errors.As(err, &apperrors.InvalidAuthTokenError{}) {
 			statusCode = http.StatusForbidden
 		}
 		return events.APIGatewayV2HTTPResponse{
@@ -152,10 +152,10 @@ func (h *UsersLambdaHandler) Login(request events.APIGatewayV2HTTPRequest) (even
 	user, err := h.userService.Login(userRequest.Username, userRequest.Password)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if errors.As(err, &errors.UserNotFoundError{}) {
+		if errors.As(err, &apperrors.UserNotFoundError{}) {
 			statusCode = http.StatusNotFound
 		}
-		if errors.As(err, &errors.IncorrectPasswordError{}) {
+		if errors.As(err, &apperrors.IncorrectPasswordError{}) {
 			statusCode = http.StatusBadRequest
 		}
 

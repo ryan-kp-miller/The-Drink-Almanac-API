@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/handler/server"
 	"the-drink-almanac-api/mocks"
 	"the-drink-almanac-api/model"
@@ -200,7 +200,7 @@ func TestCreateNewFavorite(t *testing.T) {
 			drinkId:              "0",
 			requestBody:          []byte(`{"user_id": "0", "drink_id": "0"}`),
 			returnedFavorite:     mockFavorite,
-			returnedError:        errors.NewFavoriteAlreadyExistsError("favorite already exists"),
+			returnedError:        apperrors.NewFavoriteAlreadyExistsError("favorite already exists"),
 			expectedStatusCode:   http.StatusConflict,
 			shouldMethodBeCalled: true,
 		},

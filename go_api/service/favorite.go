@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"the-drink-almanac-api/errors"
+	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/model"
 
 	"github.com/google/uuid"
@@ -58,7 +58,7 @@ func (s DefaultFavoriteService) CreateNewFavorite(drinkId, userId string) (*mode
 		}
 	}
 	if doesFavoriteExist {
-		return existingFavorite, errors.NewFavoriteAlreadyExistsError("the user already favorited this drink")
+		return existingFavorite, apperrors.NewFavoriteAlreadyExistsError("the user already favorited this drink")
 	}
 
 	favoriteUuid := uuid.New()

@@ -7,8 +7,8 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	jsoniter "github.com/json-iterator/go"
+	"the-drink-almanac-api/apperrors"
 	"the-drink-almanac-api/dto"
-	"the-drink-almanac-api/errors"
 	"the-drink-almanac-api/service"
 )
 
@@ -117,7 +117,7 @@ func (h *FavoritesLambdaHandler) CreateNewFavorite(request events.APIGatewayV2HT
 
 	newFavorite, err := h.favoriteService.CreateNewFavorite(newFavoritePostRequest.DrinkId, userId)
 	if err != nil {
-		if errors.As(err, &errors.FavoriteAlreadyExistsError{}) {
+		if errors.As(err, &apperrors.FavoriteAlreadyExistsError{}) {
 			response := events.APIGatewayV2HTTPResponse{
 				StatusCode: http.StatusConflict,
 				Body:       messageToResponseBody(fmt.Sprintf("the user '%s' already favorited the drink with id '%s'", newFavorite.UserId, newFavorite.DrinkId)),

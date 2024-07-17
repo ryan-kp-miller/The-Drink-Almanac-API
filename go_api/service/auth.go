@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"the-drink-almanac-api/errors"
+	"the-drink-almanac-api/apperrors"
 
 	"github.com/golang-jwt/jwt"
 )
@@ -38,7 +38,7 @@ func (s JwtAuthService) ValidateToken(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
-			return nil, errors.NewInvalidAuthTokenError("invalid token format")
+			return nil, apperrors.NewInvalidAuthTokenError("invalid token format")
 		}
 		return s.authSecretKey, nil
 	})
@@ -51,7 +51,7 @@ func (s JwtAuthService) ValidateToken(tokenString string) (string, error) {
 		userId := claims["userId"].(string)
 		return userId, nil
 	} else {
-		return "", errors.NewInvalidAuthTokenError("token is no longer valid")
+		return "", apperrors.NewInvalidAuthTokenError("token is no longer valid")
 	}
 }
 

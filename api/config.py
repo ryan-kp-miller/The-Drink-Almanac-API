@@ -8,8 +8,8 @@ class Config(object):
     # turn off flask_sqlalchemy modification tracker so we can use SQLAlchemy's mod tracker, which is better
     SQLALCHEMY_TRACK_MODIFICATIONS = False 
     
-    # allows Flask extensions like flask_jwt to raise their own errors,
-    # as opposed to Flask just returning a 500 for all errors
+    # allows Flask extensions like flask_jwt to raise their own apperrors,
+    # as opposed to Flask just returning a 500 for all apperrors
     PROPAGATE_EXCEPTIONS = True
 
     # set access tokens to expire in 1 hour
