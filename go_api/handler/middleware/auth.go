@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+
 	"the-drink-almanac-api/service"
 
 	"github.com/gin-gonic/gin"

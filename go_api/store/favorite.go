@@ -2,8 +2,9 @@ package store
 
 import (
 	"context"
-	"the-drink-almanac-api/client"
+
 	"the-drink-almanac-api/model"
+	"the-drink-almanac-api/store/client"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"

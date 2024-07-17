@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"the-drink-almanac-api/handler/middleware"
 	"the-drink-almanac-api/handler/server"
-	"the-drink-almanac-api/middleware"
 	"the-drink-almanac-api/model"
 	"the-drink-almanac-api/service"
 	"the-drink-almanac-api/store"
