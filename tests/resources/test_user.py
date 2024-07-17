@@ -46,9 +46,9 @@ class TestUserRegister:
         )
         assert response.status_code == 400
         data = response.get_json()
-        assert "password" in data['errors'].keys()
+        assert "password" in data['apperrors'].keys()
         assert ("Missing required parameter in the JSON body" in 
-            data['errors']['password'])
+            data['apperrors']['password'])
         
         # missing password
         response = client.post(
@@ -59,9 +59,9 @@ class TestUserRegister:
         )
         assert response.status_code == 400
         data = response.get_json()
-        assert "username" in data['errors'].keys()
+        assert "username" in data['apperrors'].keys()
         assert ("Missing required parameter in the JSON body" in 
-            data['errors']['username'])
+            data['apperrors']['username'])
 
 
 class TestUserLogin:
@@ -110,9 +110,9 @@ class TestUserLogin:
         )
         assert response.status_code == 400
         data = response.get_json()
-        assert "password" in data['errors'].keys()
+        assert "password" in data['apperrors'].keys()
         assert ("Missing required parameter in the JSON body" in 
-            data['errors']['password'])
+            data['apperrors']['password'])
         
         # missing password
         response = client.post(
@@ -123,9 +123,9 @@ class TestUserLogin:
         )
         assert response.status_code == 400
         data = response.get_json()
-        assert "username" in data['errors'].keys()
+        assert "username" in data['apperrors'].keys()
         assert ("Missing required parameter in the JSON body" in 
-            data['errors']['username'])
+            data['apperrors']['username'])
 
 
 class TestUser:
@@ -194,9 +194,9 @@ class TestUser:
         )
         assert response.status_code == 400
         data = response.get_json()
-        assert "password" in data['errors'].keys()
+        assert "password" in data['apperrors'].keys()
         assert ("Missing required parameter in the JSON body" in 
-            data['errors']['password'])
+            data['apperrors']['password'])
         
         # missing password
         response = client.delete(
@@ -207,9 +207,9 @@ class TestUser:
         )
         assert response.status_code == 400
         data = response.get_json()
-        assert "username" in data['errors'].keys()
+        assert "username" in data['apperrors'].keys()
         assert ("Missing required parameter in the JSON body" in 
-            data['errors']['username'])
+            data['apperrors']['username'])
 
     def test_delete_correct_args(self, client):
         response = client.delete(

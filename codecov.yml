@@ -1,0 +1,5 @@
+ignore:
+  - "go_api/main.go"
+  - "go_api/lambdas"
+  - "**/*mock.go"
+  - "**/*stub.go"

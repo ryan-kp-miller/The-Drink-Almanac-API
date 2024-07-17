@@ -12,3 +12,15 @@ venv
 
 # pytest-cov results
 .coverage
+
+.env
+
+# code coverage files
+coverage.txt
+coverage_raw.txt
+
+# intellij stuff
+.idea
+
+# lambda artifacts
+artifacts
